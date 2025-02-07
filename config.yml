@@ -1,0 +1,14 @@
+contexts:
+  local:
+    my-context:
+      labels:
+        foo: bar
+      files:
+        - /tmp/foo
+        - /tmp/bar
+  s3:
+    context2:
+      labels:
+        env: prod
+      bucket: toto
+      path: /foo/bar

@@ -1,0 +1,9 @@
+with-expecter: true
+packages:
+  github.com/appclacks/maizai/pkg/assistant:
+    interfaces:
+      Provider:
+      Rag:
+  github.com/appclacks/maizai/pkg/rag:
+    interfaces:
+      AI:
