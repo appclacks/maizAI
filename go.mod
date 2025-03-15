@@ -1,6 +1,6 @@
 module github.com/appclacks/maizai
 
-go 1.23.5
+go 1.24.0
 
 require (
 	github.com/anthropics/anthropic-sdk-go v0.2.0-alpha.10
