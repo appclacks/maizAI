@@ -1,0 +1,10 @@
+{
+    "options": {
+        "model": "claude-3-5-haiku-latest",
+        "system": "You should return small but accurante answers",
+        "temperature": 0,
+        "max-tokens": 8000
+    },
+    "prompt": "what's France population?",
+    "context": "test"
+}

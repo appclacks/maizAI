@@ -1,0 +1,46 @@
+project_name: maizai
+
+builds:
+  - binary: maizai
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+      - darwin
+      - linux
+      - openbsd
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: openbsd
+        goarch: arm
+      - goos: openbsd
+        goarch: arm64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+
+brews:
+  - tap:
+      owner: appclacks
+      name: homebrew-tap
+    name: maizai
+    folder: Formula
+    homepage: https://github.com/appclacks/maizai
+    skip_upload: auto
+    test: |
+      system "#{bin}/maizai --help"
+    install: |
+      bin.install "maizai"

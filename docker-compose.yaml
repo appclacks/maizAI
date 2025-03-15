@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: "timescale/timescaledb:latest-pg16"
+    network_mode: "host"
+    environment:
+      POSTGRES_DB: appclacks
+      POSTGRES_USER: appclacks
+      POSTGRES_PASSWORD: appclacks
+  jaeger:
+    image: "jaegertracing/jaeger:2.2.0"
+    network_mode: "host"
