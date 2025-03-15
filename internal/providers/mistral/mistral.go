@@ -241,3 +241,7 @@ func (c *Client) Embedding(ctx context.Context, query rag.EmbeddingQuery) (*rag.
 	span.SetStatus(codes.Ok, "success")
 	return &answer, nil
 }
+
+func (c *Client) Stream(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (<-chan aggregates.Event, error) {
+	panic("not implemented")
+}

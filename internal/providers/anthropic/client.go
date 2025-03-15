@@ -98,3 +98,85 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	span.SetStatus(codes.Ok, "success")
 	return &answer, nil
 }
+
+func (c *Client) Stream(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (<-chan aggregates.Event, error) {
+	tracer := otel.Tracer("ai")
+	ctx, span := tracer.Start(ctx, "Stream message")
+	defer span.End()
+	span.SetAttributes(semconv.GenAIRequestTemperature(options.Temperature))
+	span.SetAttributes(semconv.GenAIRequestModel(options.Model))
+	span.SetAttributes(semconv.GenAIRequestMaxTokens(int(options.MaxTokens)))
+	span.SetAttributes(semconv.GenAISystemAnthropic)
+	messagesParam := []anthropic.MessageParam{}
+	for _, message := range messages {
+		switch message.Role {
+		case "user":
+			messagesParam = append(messagesParam, anthropic.NewUserMessage(anthropic.NewTextBlock(message.Content)))
+		case "assistant":
+			messagesParam = append(messagesParam, anthropic.NewAssistantMessage(anthropic.NewTextBlock(message.Content)))
+		default:
+			err := fmt.Errorf("unknown role %s", message.Role)
+			otelspan.Error(span, err, "unknown role")
+			return nil, err
+		}
+	}
+	messageParam := anthropic.MessageNewParams{
+		Model:     anthropic.F(options.Model),
+		MaxTokens: anthropic.F(int64(options.MaxTokens)),
+		Messages:  anthropic.F(messagesParam),
+	}
+	if options.System != "" {
+		messageParam.System = anthropic.F([]anthropic.TextBlockParam{
+			anthropic.NewTextBlock(options.System),
+		})
+	}
+	stream := c.client.Messages.NewStreaming(ctx, messageParam)
+	eventChan := make(chan aggregates.Event)
+	go func() {
+		ctx, bspan := tracer.Start(ctx, "Streaming background")
+		defer bspan.End()
+		message := anthropic.Message{}
+		for stream.Next() {
+			_, espan := tracer.Start(ctx, "Streaming event")
+			event := stream.Current()
+			err := message.Accumulate(event)
+			if err != nil {
+				otelspan.Error(espan, err, "fail to accumulate message")
+				eventChan <- aggregates.Event{
+					Error: err,
+				}
+				break
+			}
+			switch delta := event.Delta.(type) {
+			case anthropic.ContentBlockDeltaEventDelta:
+				if delta.Text != "" {
+					eventChan <- aggregates.Event{
+						Delta: delta.Text,
+					}
+				}
+			}
+			espan.SetStatus(codes.Ok, "success")
+			espan.End()
+		}
+		result := []aggregates.Result{}
+		for _, m := range message.Content {
+			result = append(result, aggregates.Result{
+				Text: m.Text,
+			})
+		}
+		eventChan <- aggregates.Event{
+			Answer: &aggregates.Answer{
+				Results:      result,
+				OutputTokens: uint64(message.Usage.OutputTokens),
+				InputTokens:  uint64(message.Usage.InputTokens),
+			},
+		}
+		bspan.SetAttributes(semconv.GenAIUsageInputTokens(int(message.Usage.InputTokens)))
+		bspan.SetAttributes(semconv.GenAIUsageOutputTokens(int(message.Usage.OutputTokens)))
+		bspan.SetStatus(codes.Ok, "success")
+
+		close(eventChan)
+	}()
+	span.SetStatus(codes.Ok, "success")
+	return eventChan, nil
+}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/appclacks/maizai/internal/http/client"
@@ -41,20 +42,46 @@ func (b *Builder) Conversation(ec echo.Context) error {
 			Contexts: payload.NewContextOptions.Sources.Contexts,
 		},
 	}
-	answer, err := b.assistant.Pipeline(ctx, queryOpts, contextOpts, payload.ContextID, messages)
-	if err != nil {
-		return err
+	if payload.Stream {
+		eventChan, err := b.assistant.StreamPipeline(ctx, queryOpts, contextOpts, payload.ContextID, messages)
+		if err != nil {
+			return err
+		}
+
+		w := ec.Response()
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+		for event := range eventChan {
+			e := Event{}
+			if event.Answer != nil {
+				e.Data = []byte(fmt.Sprintf("%+v", event.Answer))
+			} else {
+				e.Data = []byte(fmt.Sprintf("%+v", event))
+			}
+
+			if err := e.MarshalTo(w); err != nil {
+				return err
+			}
+			w.Flush()
+		}
+		return nil
+	} else {
+		answer, err := b.assistant.Pipeline(ctx, queryOpts, contextOpts, payload.ContextID, messages)
+		if err != nil {
+			return err
+		}
+		response := client.ConversationAnswer{
+			Results:      []client.Result{},
+			InputTokens:  answer.InputTokens,
+			OutputTokens: answer.OutputTokens,
+			Context:      answer.Context,
+		}
+		for _, result := range answer.Results {
+			response.Results = append(response.Results, client.Result{
+				Text: result.Text,
+			})
+		}
+		return ec.JSON(http.StatusOK, response)
 	}
-	response := client.ConversationAnswer{
-		Results:      []client.Result{},
-		InputTokens:  answer.InputTokens,
-		OutputTokens: answer.OutputTokens,
-		Context:      answer.Context,
-	}
-	for _, result := range answer.Results {
-		response.Results = append(response.Results, client.Result{
-			Text: result.Text,
-		})
-	}
-	return ec.JSON(http.StatusOK, response)
 }

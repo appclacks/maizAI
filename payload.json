@@ -1,10 +1,14 @@
 {
-    "options": {
+    "query-options": {
+        "provider": "anthropic",
         "model": "claude-3-5-haiku-latest",
-        "system": "You should return small but accurante answers",
+        "system": "You are an historian",
         "temperature": 0,
         "max-tokens": 8000
     },
-    "prompt": "what's France population?",
-    "context": "test"
+    "prompt": "Do me a summary of the last 500 years of France history",
+    "new-context": {
+        "name": "stream23"
+    },
+    "stream": true
 }

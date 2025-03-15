@@ -16,6 +16,7 @@ var ragPlaceholder = "{maizai_rag_data}"
 
 type Provider interface {
 	Query(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (*aggregates.Answer, error)
+	Stream(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (<-chan aggregates.Event, error)
 }
 
 type ContextManager interface {
@@ -52,6 +53,18 @@ func (a *Assistant) Message(ctx context.Context, messages []shared.Message, opti
 		return nil, err
 	}
 	return answer, nil
+}
+
+func (a *Assistant) Stream(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (<-chan aggregates.Event, error) {
+	client, ok := a.providers[options.Provider]
+	if !ok {
+		return nil, fmt.Errorf("AI client %s not found", options.Provider)
+	}
+	streamChan, err := client.Stream(ctx, messages, options)
+	if err != nil {
+		return nil, err
+	}
+	return streamChan, nil
 }
 
 func (a *Assistant) enrichRecursively(ctx context.Context, context *shared.Context, messages []shared.Message) ([]shared.Message, error) {
@@ -163,4 +176,67 @@ func (a *Assistant) Pipeline(
 		return nil, err
 	}
 	return answer, nil
+}
+
+func (a *Assistant) StreamPipeline(
+	ctx context.Context,
+	options aggregates.QueryOptions,
+	contextOptions shared.ContextOptions,
+	contextID string,
+	messages []shared.Message) (<-chan aggregates.Event, error) {
+	context, err := a.ctxManager.CreateOrGetContext(ctx, contextID, contextOptions)
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range messages {
+		err := m.Validate()
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = options.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	if options.RagQuery.Input != "" {
+		messages, err = a.EnrichWithRag(ctx, messages, options.RagQuery)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fullMessages, err := a.Enrich(ctx, context, messages)
+	if err != nil {
+		return nil, err
+	}
+	eventChan := make(chan aggregates.Event)
+	streamChan, err := a.Stream(ctx, fullMessages, options)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		for event := range streamChan {
+			if event.Answer == nil {
+				eventChan <- event
+				if event.Error != nil {
+					break
+				}
+			} else {
+				// the answer is set only when the AI assistant sent all of its messages
+				// so it's safe to assume that the streamChan channel is closed
+				answer := event.Answer
+				answer.Context = context.ID
+				err = a.UpdateContext(ctx, context.ID, messages, answer.Results)
+				if err != nil {
+					event.Error = err
+				}
+				eventChan <- event
+				break
+			}
+		}
+		close(eventChan)
+
+	}()
+	return eventChan, nil
 }

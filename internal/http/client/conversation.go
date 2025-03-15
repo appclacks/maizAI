@@ -25,6 +25,7 @@ type CreateConversationInput struct {
 	Prompt            string         `json:"prompt" required:"true"`
 	ContextID         string         `json:"context-id,omitempty"`
 	NewContextOptions ContextOptions `json:"new-context"`
+	Stream            bool           `json:"stream"`
 }
 
 type Result struct {

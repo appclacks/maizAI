@@ -35,3 +35,9 @@ type Answer struct {
 	OutputTokens uint64   `json:"output-tokens"`
 	Context      string   `json:"context"`
 }
+
+type Event struct {
+	Answer *Answer
+	Delta  string
+	Error  error
+}
