@@ -1,14 +1,14 @@
 {
     "query-options": {
         "provider": "anthropic",
-        "model": "claude-3-5-haiku-latest",
+        "model": "claude-3-7-sonnet-latest",
         "system": "You are an historian",
         "temperature": 0,
-        "max-tokens": 8000
+        "max-tokens": 1000
     },
     "prompt": "Do me a summary of the last 500 years of France history",
     "new-context": {
-        "name": "stream23"
+        "name": "stream53"
     },
     "stream": true
 }

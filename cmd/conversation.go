@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/appclacks/maizai/internal/http/client"
 	"github.com/spf13/cobra"
@@ -22,6 +23,7 @@ func buildConversationCmd() *cobra.Command {
 	var contextName string
 	var contextDescription string
 	var interactive bool
+	var stream bool
 	var ragInput string
 	var ragModel string
 	var ragProvider string
@@ -61,24 +63,45 @@ If a context ID is provided, it will be used as input for the conversation. Else
 				Prompt:            prompt,
 			}
 			if interactive {
+				input.Stream = stream
 				fmt.Printf("Hello, I'm your AI assistant. Ask me anything:\n\n")
 				reader := bufio.NewReader(os.Stdin)
 				var updatedContextID = contextID
 				for {
 					input.ContextID = updatedContextID
 					prompt, err := reader.ReadString('\n')
+					prompt = strings.TrimSpace(prompt)
+					fmt.Println("")
 					exitIfError(err)
 					if prompt == "exit" || prompt == "exit\n" {
 						return
 					}
 					input.Prompt = prompt
-					answer, err := c.CreateConversation(ctx, *input)
-					exitIfError(err)
-					fmt.Printf("\nAnswer (input tokens %d, output tokens %d):\n\n", answer.InputTokens, answer.OutputTokens)
-					for _, result := range answer.Results {
-						fmt.Printf("%s\n", result.Text)
+					if stream {
+						eventChan, err := c.StreamConversation(ctx, *input)
+						exitIfError(err)
+						for event := range eventChan {
+							fmt.Print(event.Delta)
+							if event.Error != "" {
+								fmt.Printf("\nerror: %s\n", event.Error)
+							}
+							if event.InputTokens != 0 {
+								fmt.Printf("\n\nInput tokens: %d, output tokens: %d\n", event.InputTokens, event.OutputTokens)
+							}
+							if event.Context != "" {
+								updatedContextID = event.Context
+							}
+						}
+
+					} else {
+						answer, err := c.CreateConversation(ctx, *input)
+						exitIfError(err)
+						fmt.Printf("\nAnswer (input tokens %d, output tokens %d):\n\n", answer.InputTokens, answer.OutputTokens)
+						for _, result := range answer.Results {
+							fmt.Printf("\n%s\n", result.Text)
+						}
+						updatedContextID = answer.Context
 					}
-					updatedContextID = answer.Context
 					fmt.Printf("\nAnything else (write 'exit' to exit the program)?\n\n")
 				}
 
@@ -109,7 +132,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	cmd.PersistentFlags().Uint64Var(&maxTokens, "max-tokens", 8192, "Maximum tokens on the answer")
 	cmd.PersistentFlags().StringSliceVar(&sourcesContext, "source-context", []string{}, "Contexts to load")
 	cmd.PersistentFlags().BoolVar(&interactive, "interactive", false, "Starts an interactive conversation")
-
+	cmd.PersistentFlags().BoolVar(&stream, "stream", false, "Streams the conversation")
 	cmd.PersistentFlags().StringVar(&ragInput, "rag-input", "", "Input to use to fetch data from MaiZAI RAG")
 	cmd.PersistentFlags().StringVar(&ragModel, "rag-model", "mistral-embed", "Model to use for the rag")
 	cmd.PersistentFlags().StringVar(&ragProvider, "rag-provider", "mistral", "The AI provider to use for the rag")

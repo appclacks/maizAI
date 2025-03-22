@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -53,17 +54,31 @@ func (b *Builder) Conversation(ec echo.Context) error {
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 		for event := range eventChan {
-			e := Event{}
-			if event.Answer != nil {
-				e.Data = []byte(fmt.Sprintf("%+v", event.Answer))
-			} else {
-				e.Data = []byte(fmt.Sprintf("%+v", event))
+			e := client.ConversationStreamEvent{
+				Delta: event.Delta,
 			}
-
-			if err := e.MarshalTo(w); err != nil {
+			if event.Error != nil {
+				e.Error = event.Error.Error()
+			}
+			if event.Answer != nil {
+				e.InputTokens = event.Answer.InputTokens
+				e.OutputTokens = event.Answer.OutputTokens
+				e.Context = event.Answer.Context
+			}
+			j, err := json.Marshal(e)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprintf(w, "data: %s\n", j)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprint(w, "\n")
+			if err != nil {
 				return err
 			}
 			w.Flush()
+
 		}
 		return nil
 	} else {

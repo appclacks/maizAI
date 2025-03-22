@@ -141,10 +141,12 @@ func (c *Client) Stream(ctx context.Context, messages []shared.Message, options 
 			event := stream.Current()
 			err := message.Accumulate(event)
 			if err != nil {
-				otelspan.Error(espan, err, "fail to accumulate message")
+				otelspan.Error(espan, err, "failed to accumulate message")
 				eventChan <- aggregates.Event{
 					Error: err,
 				}
+				espan.End()
+				// TODO should completely exit in case of error?
 				break
 			}
 			switch delta := event.Delta.(type) {

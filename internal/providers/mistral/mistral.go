@@ -1,6 +1,7 @@
 package mistral
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptrace"
+	"strings"
 
 	"github.com/appclacks/maizai/internal/otelspan"
 	"github.com/appclacks/maizai/pkg/assistant/aggregates"
@@ -54,6 +56,7 @@ type queryPayload struct {
 	Temperature float64   `json:"temperature,omitempty"`
 	Messages    []message `json:"messages"`
 	MaxTokens   uint64    `json:"max_tokens,omitempty"`
+	Stream      bool      `json:"stream"`
 }
 
 type usage struct {
@@ -68,14 +71,21 @@ type answerMessage struct {
 	Content string `json:"content"`
 }
 
+type delta struct {
+	Content string `json:"content"`
+}
+
 type choice struct {
-	Messsage     answerMessage `json:"message"`
+	Index        uint64        `json:"index"`
+	Message      answerMessage `json:"message"`
 	FinishReason string        `json:"finish_reason"`
+	Delta        delta         `json:"delta"`
 }
 
 type queryResponse struct {
 	ID      string   `json:"id"`
 	Usage   usage    `json:"usage"`
+	Object  string   `json:"object"`
 	Choices []choice `json:"choices"`
 }
 
@@ -92,6 +102,20 @@ type embeddingResponse struct {
 type embeddingQuery struct {
 	Input []string `json:"input"`
 	Model string   `json:"model"`
+}
+
+func eventData(body string) (*queryResponse, error) {
+	after, found := strings.CutPrefix(body, "data: ")
+	if !found {
+		return nil, fmt.Errorf("invalid event data %s", body)
+	}
+	var result queryResponse
+	err := json.Unmarshal([]byte(after), &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (c *Client) Query(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (*aggregates.Answer, error) {
@@ -170,7 +194,7 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	}
 	for _, choice := range result.Choices {
 		answer.Results = append(answer.Results, aggregates.Result{
-			Text: choice.Messsage.Content,
+			Text: choice.Message.Content,
 		})
 	}
 	span.SetAttributes(semconv.GenAIUsageInputTokens(int(result.Usage.PromptTokens)))
@@ -243,5 +267,136 @@ func (c *Client) Embedding(ctx context.Context, query rag.EmbeddingQuery) (*rag.
 }
 
 func (c *Client) Stream(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (<-chan aggregates.Event, error) {
-	panic("not implemented")
+	tracer := otel.Tracer("ai")
+	ctx, span := tracer.Start(ctx, "Stream message")
+	defer span.End()
+	span.SetAttributes(semconv.GenAIRequestTemperature(options.Temperature))
+	span.SetAttributes(semconv.GenAIRequestModel(options.Model))
+	span.SetAttributes(semconv.GenAIRequestMaxTokens(int(options.MaxTokens)))
+	span.SetAttributes(semconv.GenAISystemKey.String("mistral_ai"))
+	payload := queryPayload{
+		Model:       options.Model,
+		Temperature: options.Temperature,
+		MaxTokens:   options.MaxTokens,
+		Messages:    []message{},
+		Stream:      true,
+	}
+	if options.System != "" {
+		message := message{
+			Role:    "system",
+			Content: options.System,
+		}
+		payload.Messages = append(payload.Messages, message)
+	}
+	for _, msg := range messages {
+		message := message{
+			Role:    msg.Role,
+			Content: msg.Content,
+		}
+		payload.Messages = append(payload.Messages, message)
+	}
+
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		otelspan.Error(span, err, "json error")
+		return nil, err
+	}
+	eventChan := make(chan aggregates.Event)
+	request, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		"https://api.mistral.ai/v1/chat/completions",
+		bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.config.APIKey))
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Accept", "application/json")
+	response, err := c.client.Do(request)
+	if err != nil {
+		otelspan.Error(span, err, "mistral api error")
+		return nil, err
+	}
+	if response.StatusCode >= 300 {
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			otelspan.Error(span, err, "fail to read body")
+			return nil, err
+		}
+		err = fmt.Errorf("Mistral API returned an error: status %d\n%s", response.StatusCode, string(body))
+		otelspan.Error(span, err, "mistral http error")
+		return nil, err
+	}
+	reader := bufio.NewReader(response.Body)
+
+	go func() {
+		ctx, bspan := tracer.Start(ctx, "Streaming background")
+		defer bspan.End()
+		defer response.Body.Close()
+		finalMessage := ""
+		var promptTokens, completionTokens uint64
+		for {
+			_, espan := tracer.Start(ctx, "Streaming event")
+			line, err := reader.ReadBytes('\n')
+			if err != nil {
+				otelspan.Error(espan, err, "failed to read data")
+				eventChan <- aggregates.Event{
+					Error: err,
+				}
+				espan.End()
+				break
+			}
+			lineStr := string(line)
+			if lineStr == "" || lineStr == "\n" {
+				continue
+			}
+			if strings.HasPrefix(lineStr, "data: [DONE]") {
+				bspan.SetAttributes(semconv.GenAIUsageInputTokens(int(promptTokens)))
+				bspan.SetAttributes(semconv.GenAIUsageOutputTokens(int(completionTokens)))
+				results := []aggregates.Result{
+					{
+						Text: finalMessage,
+					},
+				}
+				eventChan <- aggregates.Event{
+					Answer: &aggregates.Answer{
+						Results:      results,
+						OutputTokens: completionTokens,
+						InputTokens:  promptTokens,
+					},
+				}
+				espan.SetStatus(codes.Ok, "success")
+				espan.End()
+				break
+			}
+			result, err := eventData(lineStr)
+			if err != nil {
+				otelspan.Error(espan, err, "failed to parse data")
+				eventChan <- aggregates.Event{
+					Error: err,
+				}
+				espan.End()
+				break
+			}
+			for _, choice := range result.Choices {
+				finalMessage = fmt.Sprintf("%s%s", finalMessage, choice.Delta.Content)
+				eventChan <- aggregates.Event{
+					Delta: choice.Delta.Content,
+				}
+			}
+			if result.Usage.PromptTokens != 0 {
+				promptTokens = result.Usage.PromptTokens
+			}
+			if result.Usage.CompletionTokens != 0 {
+				completionTokens = result.Usage.CompletionTokens
+			}
+			bspan.SetStatus(codes.Ok, "success")
+			espan.End()
+
+		}
+
+	}()
+	span.SetStatus(codes.Ok, "success")
+	return eventChan, nil
 }
