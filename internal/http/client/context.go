@@ -10,20 +10,20 @@ import (
 )
 
 type Context struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
-	Sources     ContextSources `json:"sources"`
-	Messages    []Message      `json:"messages,omitempty"`
-	CreatedAt   time.Time      `json:"created-at"`
+	ID          string         `json:"id" description:"The context ID"`
+	Name        string         `json:"name" description:"The context name"`
+	Description string         `json:"description,omitempty" description:"The context description"`
+	Sources     ContextSources `json:"sources" description:"Sources for this context"`
+	Messages    []Message      `json:"messages,omitempty" description:"messages attached to this context"`
+	CreatedAt   time.Time      `json:"created-at" description:"The context creation date"`
 }
 
 type ContextMetadata struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
-	CreatedAt   time.Time      `json:"created-at"`
-	Sources     ContextSources `json:"sources"`
+	ID          string         `json:"id" description:"The context ID"`
+	Name        string         `json:"name" description:"The context name"`
+	Description string         `json:"description,omitempty" description:"The context description"`
+	CreatedAt   time.Time      `json:"created-at" description:"The context creation date"`
+	Sources     ContextSources `json:"sources" description:"Sources for this context"`
 }
 
 type ContextSources struct {
@@ -39,15 +39,15 @@ type DeleteContextInput struct {
 }
 
 type Message struct {
-	ID        string    `json:"id"`
-	Role      string    `json:"role"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created-at"`
+	ID        string    `json:"id" description:"The message ID"`
+	Role      string    `json:"role" description:"The message role"`
+	Content   string    `json:"content" description:"The message content"`
+	CreatedAt time.Time `json:"created-at" description:"The message creation date"`
 }
 
 type CreateContextMessage struct {
-	Role    string `json:"role" required:"true"`
-	Content string `json:"content" required:"true"`
+	Role    string `json:"role" required:"true" description:"The message role"`
+	Content string `json:"content" required:"true" description:"The message content"`
 }
 
 type AddMessagesToContextInput struct {
@@ -57,8 +57,8 @@ type AddMessagesToContextInput struct {
 
 type UpdateContextMessageInput struct {
 	ID      string `json:"-" param:"id" path:"id"`
-	Role    string `json:"role" required:"true"`
-	Content string `json:"content" required:"true"`
+	Role    string `json:"role" required:"true" description:"The message role"`
+	Content string `json:"content" required:"true" description:"The message content"`
 }
 
 type DeleteContextMessageInput struct {
@@ -66,10 +66,10 @@ type DeleteContextMessageInput struct {
 }
 
 type CreateContextInput struct {
-	Name        string                 `json:"name" required:"true"`
-	Description string                 `json:"description"`
-	Sources     shared.ContextSources  `json:"sources"`
-	Messages    []CreateContextMessage `json:"messages"`
+	Name        string                 `json:"name" required:"true" description:"The context name"`
+	Description string                 `json:"description" description:"The context description"`
+	Sources     shared.ContextSources  `json:"sources" description:"Sources for this context"`
+	Messages    []CreateContextMessage `json:"messages" description:"messages attached to this context"`
 }
 
 type DeleteContextSourceContextInput struct {

@@ -12,26 +12,26 @@ import (
 )
 
 type QueryOptions struct {
-	Model       string         `json:"model"`
-	System      string         `json:"system"`
-	Temperature float64        `json:"temperature"`
-	MaxTokens   uint64         `json:"max-tokens"`
-	Provider    string         `json:"provider"`
-	RagQuery    RagSearchQuery `json:"rag,omitempty"`
+	Model       string         `json:"model" required:"true" description:"The model to use"`
+	System      string         `json:"system" description:"The system prompt"`
+	Temperature float64        `json:"temperature" description:"The temperature parameter passed to the AI provider"`
+	MaxTokens   uint64         `json:"max-tokens" required:"true" description:"The maximum number of tokens for the output"`
+	Provider    string         `json:"provider" required:"true" description:"The AI provider to use"`
+	RagQuery    RagSearchQuery `json:"rag,omitempty" description:"RAG query configuration"`
 }
 
 type ContextOptions struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Sources     ContextSources `json:"sources"`
+	Name        string         `json:"name" required:"true" description:"The context name"`
+	Description string         `json:"description" description:"The context description"`
+	Sources     ContextSources `json:"sources" description:"Context sources to use for the new context"`
 }
 
 type CreateConversationInput struct {
-	QueryOptions      QueryOptions   `json:"query-options"`
-	Prompt            string         `json:"prompt" required:"true"`
-	ContextID         string         `json:"context-id,omitempty"`
-	NewContextOptions ContextOptions `json:"new-context"`
-	Stream            bool           `json:"stream"`
+	QueryOptions      QueryOptions   `json:"query-options" description:"The conversation query options"`
+	Prompt            string         `json:"prompt" required:"true" description:"The prompt that will be passed to the AI provider"`
+	ContextID         string         `json:"context-id,omitempty" description:"The ID of an existing context to use for this conversation"`
+	NewContextOptions ContextOptions `json:"new-context" description:"Options to create a new context"`
+	Stream            bool           `json:"stream" description:"Streaming mode using SSE"`
 }
 
 type Result struct {
@@ -39,10 +39,10 @@ type Result struct {
 }
 
 type ConversationAnswer struct {
-	Results      []Result `json:"result"`
-	InputTokens  uint64   `json:"input-tokens"`
-	OutputTokens uint64   `json:"output-tokens"`
-	Context      string   `json:"context"`
+	Results      []Result `json:"result" description:"The result returned by the AI provider"`
+	InputTokens  uint64   `json:"input-tokens" description:"The number of input tokens"`
+	OutputTokens uint64   `json:"output-tokens" description:"The number of output tokens"`
+	Context      string   `json:"context" description:"The ID of the context used for this conversation"`
 }
 
 type ConversationStreamEvent struct {

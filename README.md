@@ -8,6 +8,7 @@ Key features:
 
 - API-first (see OpenAPI spec)
 - Contexts management: Create, update, delete contexts and use them when sending queries to AI providers. MaiZAI also supports dependencies between contexts to favor contexts reusing across messages.
+- Streaming support (using SSE)
 - RAG support using [pgvector](https://github.com/pgvector/pgvector), with an API to generate vectors from text: send text data and the embedding provider and model to use, and MaiZAI will take care of querying the embedding provider and store the result for later use
 - Advanced observability: Prometheus metrics, Opentelemetry traces implementing [Gen AI semantic conventions for spans attributes](https://opentelemetry.io/docs/specs/semconv/gen-ai/) (input and output tokens, models used, provider...). The SQL layer (including the RAG one) and the HTTP server is also fully covered by tracing.
 - Simple deployment: MaizAI requires only a PostgreSQL database to run and is distributed as a single binary (a Docker image is also available)

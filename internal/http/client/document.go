@@ -8,18 +8,18 @@ import (
 )
 
 type Document struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created-at"`
+	ID          string    `json:"id" description:"The document ID"`
+	Name        string    `json:"name" description:"The document name"`
+	Description string    `json:"description" description:"The document description"`
+	CreatedAt   time.Time `json:"created-at" description:"The document creation date"`
 }
 
 type DocumentChunk struct {
-	ID         string    `json:"id"`
-	DocumentID string    `json:"document-id,omitempty"`
-	Fragment   string    `json:"fragment"`
+	ID         string    `json:"id" description:"The document chunk ID"`
+	DocumentID string    `json:"document-id,omitempty" description:"The related document ID"`
+	Fragment   string    `json:"fragment" description:"The text fragment embedded for this document"`
 	Embedding  []float32 `json:"-"`
-	CreatedAt  time.Time `json:"created-at"`
+	CreatedAt  time.Time `json:"created-at" description:"The document chunk creation date"`
 }
 
 type ListDocumentChunksForDocumentInput struct {
@@ -45,9 +45,9 @@ type CreateDocumentInput struct {
 
 type EmbedDocumentInput struct {
 	DocumentID string `json:"-" param:"document-id" path:"document-id"`
-	Model      string `json:"model" required:"true"`
-	Input      string `json:"input" required:"true"`
-	Provider   string `json:"provider" required:"true"`
+	Model      string `json:"model" required:"true" description:"The embedding model to use"`
+	Input      string `json:"input" required:"true" description:"The query that will be executed on the RAG"`
+	Provider   string `json:"provider" required:"true" description:"The provider to use for embedding"`
 }
 
 type ListDocumentsOutput struct {
@@ -59,10 +59,10 @@ type ListDocumentChunksOutput struct {
 }
 
 type RagSearchQuery struct {
-	Input    string `json:"input" required:"true"`
-	Model    string `json:"model" required:"true"`
-	Provider string `json:"provider" required:"true"`
-	Limit    int32  `json:"limit" required:"true"`
+	Input    string `json:"input" required:"true" description:"The query that will be executed on the RAG"`
+	Model    string `json:"model" required:"true" description:"The embedding model to use"`
+	Provider string `json:"provider" required:"true" description:"The provider to use for embedding"`
+	Limit    int32  `json:"limit" required:"true" description:"The number of results to return from the RAG database. Results will be concatenated and passed as context."`
 }
 
 func (c *Client) ListDocuments(ctx context.Context) (*ListDocumentsOutput, error) {
