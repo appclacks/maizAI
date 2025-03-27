@@ -40,7 +40,7 @@ func New(config Config) *Client {
 		option.WithHTTPClient(httpClient),
 	)
 	return &Client{
-		client: client,
+		client: &client,
 	}
 }
 
@@ -66,14 +66,14 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 		}
 	}
 	messageParam := anthropic.MessageNewParams{
-		Model:     anthropic.F(options.Model),
-		MaxTokens: anthropic.F(int64(options.MaxTokens)),
-		Messages:  anthropic.F(messagesParam),
+		Model:     options.Model,
+		MaxTokens: int64(options.MaxTokens),
+		Messages:  messagesParam,
 	}
 	if options.System != "" {
-		messageParam.System = anthropic.F([]anthropic.TextBlockParam{
-			anthropic.NewTextBlock(options.System),
-		})
+		messageParam.System = []anthropic.TextBlockParam{
+			{Text: options.System},
+		}
 	}
 	message, err := c.client.Messages.New(ctx, messageParam)
 	if err != nil {
@@ -121,14 +121,14 @@ func (c *Client) Stream(ctx context.Context, messages []shared.Message, options 
 		}
 	}
 	messageParam := anthropic.MessageNewParams{
-		Model:     anthropic.F(options.Model),
-		MaxTokens: anthropic.F(int64(options.MaxTokens)),
-		Messages:  anthropic.F(messagesParam),
+		Model:     options.Model,
+		MaxTokens: int64(options.MaxTokens),
+		Messages:  messagesParam,
 	}
 	if options.System != "" {
-		messageParam.System = anthropic.F([]anthropic.TextBlockParam{
-			anthropic.NewTextBlock(options.System),
-		})
+		messageParam.System = []anthropic.TextBlockParam{
+			{Text: options.System},
+		}
 	}
 	stream := c.client.Messages.NewStreaming(ctx, messageParam)
 	eventChan := make(chan aggregates.Event)
@@ -149,11 +149,14 @@ func (c *Client) Stream(ctx context.Context, messages []shared.Message, options 
 				// TODO should completely exit in case of error?
 				break
 			}
-			switch delta := event.Delta.(type) {
-			case anthropic.ContentBlockDeltaEventDelta:
-				if delta.Text != "" {
-					eventChan <- aggregates.Event{
-						Delta: delta.Text,
+			switch eventVariant := event.AsAny().(type) {
+			case anthropic.ContentBlockDeltaEvent:
+				switch deltaVariant := eventVariant.Delta.AsAny().(type) {
+				case anthropic.TextDelta:
+					if deltaVariant.Text != "" {
+						eventChan <- aggregates.Event{
+							Delta: deltaVariant.Text,
+						}
 					}
 				}
 			}
