@@ -1,0 +1,602 @@
+openapi: 3.0.3
+info:
+  description: Maizai HTTP API spec
+  title: MaizAI API
+  version: 0.0.1
+paths:
+  /api/v1/context:
+    get:
+      description: List contexts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListContextOutput'
+          description: OK
+    post:
+      description: Create a new context
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreateContextInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/context/{id}:
+    delete:
+      description: Delete a context by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+    get:
+      description: Get a context by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientContext'
+          description: OK
+  /api/v1/context/{id}/message:
+    post:
+      description: Add new messages for a given context
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/context/{id}/sources/context/{source-context-id}:
+    delete:
+      description: Remove a context used as a source for a given context
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: source-context-id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+    post:
+      description: Add a context as a source for a given context
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: source-context-id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/conversation:
+    post:
+      description: Send a message to the AI provider. If a context ID is passed as
+        parameter, use this context as a base. Else, a new context whose name will
+        be the context named as parameter will be created.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreateConversationInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientConversationAnswer'
+          description: OK
+  /api/v1/document:
+    get:
+      description: List documents
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListDocumentsOutput'
+          description: OK
+    post:
+      description: Create a new document
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreateDocumentInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/document-chunk:
+    put:
+      description: Return chunks matching the provided input
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRagSearchQuery'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListDocumentChunksOutput'
+          description: OK
+  /api/v1/document-chunk/{id}:
+    delete:
+      description: Delete a document chunk by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/document/{document-id}:
+    post:
+      description: Embed the input passed as parameter for the given document, to
+        use it later in MaizAI's RAG
+      parameters:
+      - in: path
+        name: document-id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientEmbedDocumentInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/document/{id}:
+    delete:
+      description: Delete a document by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+    get:
+      description: Get a document by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDocument'
+          description: OK
+  /api/v1/document/{id}/chunks:
+    get:
+      description: List chunks for a given document
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListDocumentChunksOutput'
+          description: OK
+  /api/v1/message/{id}:
+    delete:
+      description: Delete a message by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+    put:
+      description: Update an existing message
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateContextMessageInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+components:
+  schemas:
+    ClientContext:
+      properties:
+        created-at:
+          description: The context creation date
+          format: date-time
+          type: string
+        description:
+          description: The context description
+          type: string
+        id:
+          description: The context ID
+          type: string
+        messages:
+          description: messages attached to this context
+          items:
+            $ref: '#/components/schemas/ClientMessage'
+          type: array
+        name:
+          description: The context name
+          type: string
+        sources:
+          $ref: '#/components/schemas/ClientContextSources'
+      type: object
+    ClientContextMetadata:
+      properties:
+        created-at:
+          description: The context creation date
+          format: date-time
+          type: string
+        description:
+          description: The context description
+          type: string
+        id:
+          description: The context ID
+          type: string
+        name:
+          description: The context name
+          type: string
+        sources:
+          $ref: '#/components/schemas/ClientContextSources'
+      type: object
+    ClientContextOptions:
+      properties:
+        description:
+          description: The context description
+          type: string
+        name:
+          description: The context name
+          type: string
+        sources:
+          $ref: '#/components/schemas/ClientContextSources'
+      required:
+      - name
+      type: object
+    ClientContextSources:
+      properties:
+        contexts:
+          items:
+            type: string
+          type: array
+      type: object
+    ClientConversationAnswer:
+      properties:
+        context:
+          description: The ID of the context used for this conversation
+          type: string
+        input-tokens:
+          description: The number of input tokens
+          minimum: 0
+          type: integer
+        output-tokens:
+          description: The number of output tokens
+          minimum: 0
+          type: integer
+        result:
+          description: The result returned by the AI provider
+          items:
+            $ref: '#/components/schemas/ClientResult'
+          nullable: true
+          type: array
+      type: object
+    ClientCreateContextInput:
+      properties:
+        description:
+          description: The context description
+          type: string
+        messages:
+          description: messages attached to this context
+          items:
+            $ref: '#/components/schemas/ClientCreateContextMessage'
+          nullable: true
+          type: array
+        name:
+          description: The context name
+          type: string
+        sources:
+          $ref: '#/components/schemas/SharedContextSources'
+      required:
+      - name
+      type: object
+    ClientCreateContextMessage:
+      properties:
+        content:
+          description: The message content
+          type: string
+        role:
+          description: The message role
+          type: string
+      required:
+      - role
+      - content
+      type: object
+    ClientCreateConversationInput:
+      properties:
+        context-id:
+          description: The ID of an existing context to use for this conversation
+          type: string
+        new-context:
+          $ref: '#/components/schemas/ClientContextOptions'
+        prompt:
+          description: The prompt that will be passed to the AI provider
+          type: string
+        query-options:
+          $ref: '#/components/schemas/ClientQueryOptions'
+        stream:
+          description: Streaming mode using SSE
+          type: boolean
+      required:
+      - prompt
+      type: object
+    ClientCreateDocumentInput:
+      properties:
+        description:
+          type: string
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    ClientDocument:
+      properties:
+        created-at:
+          description: The document creation date
+          format: date-time
+          type: string
+        description:
+          description: The document description
+          type: string
+        id:
+          description: The document ID
+          type: string
+        name:
+          description: The document name
+          type: string
+      type: object
+    ClientDocumentChunk:
+      properties:
+        created-at:
+          description: The document chunk creation date
+          format: date-time
+          type: string
+        document-id:
+          description: The related document ID
+          type: string
+        fragment:
+          description: The text fragment embedded for this document
+          type: string
+        id:
+          description: The document chunk ID
+          type: string
+      type: object
+    ClientEmbedDocumentInput:
+      properties:
+        input:
+          description: The query that will be executed on the RAG
+          type: string
+        model:
+          description: The embedding model to use
+          type: string
+        provider:
+          description: The provider to use for embedding
+          type: string
+      required:
+      - model
+      - input
+      - provider
+      type: object
+    ClientListContextOutput:
+      properties:
+        contexts:
+          items:
+            $ref: '#/components/schemas/ClientContextMetadata'
+          nullable: true
+          type: array
+      type: object
+    ClientListDocumentChunksOutput:
+      properties:
+        chunks:
+          items:
+            $ref: '#/components/schemas/ClientDocumentChunk'
+          nullable: true
+          type: array
+      type: object
+    ClientListDocumentsOutput:
+      properties:
+        documents:
+          items:
+            $ref: '#/components/schemas/ClientDocument'
+          nullable: true
+          type: array
+      type: object
+    ClientMessage:
+      properties:
+        content:
+          description: The message content
+          type: string
+        created-at:
+          description: The message creation date
+          format: date-time
+          type: string
+        id:
+          description: The message ID
+          type: string
+        role:
+          description: The message role
+          type: string
+      type: object
+    ClientQueryOptions:
+      properties:
+        max-tokens:
+          description: The maximum number of tokens for the output
+          minimum: 0
+          type: integer
+        model:
+          description: The model to use
+          type: string
+        provider:
+          description: The AI provider to use
+          type: string
+        rag:
+          $ref: '#/components/schemas/ClientRagSearchQuery'
+        system:
+          description: The system prompt
+          type: string
+        temperature:
+          description: The temperature parameter passed to the AI provider
+          type: number
+      required:
+      - model
+      - max-tokens
+      - provider
+      type: object
+    ClientRagSearchQuery:
+      properties:
+        input:
+          description: The query that will be executed on the RAG
+          type: string
+        limit:
+          description: The number of results to return from the RAG database. Results
+            will be concatenated and passed as context.
+          type: integer
+        model:
+          description: The embedding model to use
+          type: string
+        provider:
+          description: The provider to use for embedding
+          type: string
+      required:
+      - input
+      - model
+      - provider
+      - limit
+      type: object
+    ClientResponse:
+      properties:
+        messages:
+          items:
+            type: string
+          nullable: true
+          type: array
+      type: object
+    ClientResult:
+      properties:
+        text:
+          type: string
+      type: object
+    ClientUpdateContextMessageInput:
+      properties:
+        content:
+          description: The message content
+          type: string
+        role:
+          description: The message role
+          type: string
+      required:
+      - role
+      - content
+      type: object
+    SharedContextSources:
+      properties:
+        contexts:
+          items:
+            type: string
+          type: array
+      type: object
