@@ -52,5 +52,9 @@ func TestMain(m *testing.M) {
 	logger := slog.Default()
 	TestComponent = InitTestDB(logger)
 	exitVal := m.Run()
+	err := Cleanup(TestComponent)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	os.Exit(exitVal)
 }

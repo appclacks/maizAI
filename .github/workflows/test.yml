@@ -7,6 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      MAIZAI_POSTGRESQL_USERNAME: appclacks
+      MAIZAI_POSTGRESQL_PASSWORD: appclacks
+      MAIZAI_POSTGRESQL_DATABASE: appclacks
+      MAIZAI_POSTGRESQL_HOST: 127.0.0.1
+      MAIZAI_POSTGRESQL_PORT: 5432
+      MAIZAI_POSTGRESQL_SSL_MODE: "disable"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
@@ -16,6 +23,8 @@ jobs:
       - name: Start pg container
         run: docker run -p 5432:5432 --name appclacks-pg -e POSTGRES_DB=appclacks -e POSTGRES_USER=appclacks -e POSTGRES_PASSWORD=appclacks -d timescale/timescaledb:latest-pg16
       - name: Run testing
+        run: go test -tags="integration" -race -v ./...
+      - name: Run integration tests
         run: go test -race -v ./...
       - name: stop container
         run: docker stop appclacks-pg
