@@ -13,5 +13,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      - name: Start pg container
+        run: docker run -p 5432:5432 --name appclacks-pg -e POSTGRES_DB=appclacks -e POSTGRES_USER=appclacks -e POSTGRES_PASSWORD=appclacks -d timescale/timescaledb:latest-pg16
       - name: Run testing
         run: go test -race -v ./...
+      - name: stop container
+        run: docker stop appclacks-pg
