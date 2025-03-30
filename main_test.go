@@ -1,3 +1,5 @@
+//go:build integration
+
 package main_test
 
 import (
@@ -500,6 +502,16 @@ func httpTest(t *testing.T, client *http.Client, c testCase) error {
 	return nil
 }
 
+func Cleanup(c *database.Database) error {
+	for _, query := range database.CleanupQueries {
+		_, err := c.Exec(query)
+		if err != nil {
+			return fmt.Errorf("fail to clean DB on query %s: %w", query, err)
+		}
+	}
+	return nil
+}
+
 func TestIntegration(t *testing.T) {
 	aiMock := aimock.NewMockAI(t)
 	os.Setenv("MAIZAI_ANTHROPIC_API_KEY", "random_api_key")
@@ -523,6 +535,8 @@ func TestIntegration(t *testing.T) {
 	config, err := config.Load()
 	assert.NoError(t, err)
 	db, err := database.New(config.Store.PostgreSQL)
+	assert.NoError(t, err)
+	err = Cleanup(db)
 	assert.NoError(t, err)
 	clients, err := cmd.BuildProviders(config.Providers)
 	assert.NoError(t, err)
