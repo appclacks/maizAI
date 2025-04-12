@@ -184,17 +184,17 @@ func (a *Assistant) StreamPipeline(
 	contextOptions shared.ContextOptions,
 	contextID string,
 	messages []shared.Message) (<-chan aggregates.Event, error) {
-	context, err := a.ctxManager.CreateOrGetContext(ctx, contextID, contextOptions)
-	if err != nil {
-		return nil, err
-	}
 	for _, m := range messages {
 		err := m.Validate()
 		if err != nil {
 			return nil, err
 		}
 	}
-	err = options.Validate()
+	err := options.Validate()
+	if err != nil {
+		return nil, err
+	}
+	context, err := a.ctxManager.CreateOrGetContext(ctx, contextID, contextOptions)
 	if err != nil {
 		return nil, err
 	}
