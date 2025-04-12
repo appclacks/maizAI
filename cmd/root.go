@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/appclacks/maizai/internal/mcp"
 	"github.com/spf13/cobra"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -31,6 +32,23 @@ func Run() error {
 	if err != nil {
 		return err
 	}
+
+	mcpClient, err := mcp.NewSSEClient(context.Background(), "http://localhost:3001/sse")
+	if err != nil {
+		return err
+	}
+	tools, err := mcpClient.ListTools(context.Background())
+	if err != nil {
+		return err
+		for _, tool := range tools {
+			fmt.Printf("tool - %s\n", tool.Name)
+		}
+	}
+	content, err := mcpClient.CallTool(context.Background(), "printEnv", make(map[string]any))
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%+v\n", content)
 
 	r := resource.NewWithAttributes(
 		semconv.SchemaURL,
