@@ -75,11 +75,11 @@ This section explains the main MaizAI's CLI commands. You can use the `--help` f
 Let's start a conversation using the Mistral provider and its mistral-small-latest model:
 
 ```
-maizai conversation
-  --provider mistral
-  --model mistral-small-latest
-  --system "you're a general purpose AI assistant"
-  --interactive
+maizai conversation \
+  --provider mistral \
+  --model mistral-small-latest \
+  --system "you're a general purpose AI assistant" \
+  --interactive \
   --context-name "my-context"
 Hello, I'm your AI assistant. Ask me anything:
 
@@ -256,7 +256,7 @@ maizai conversation
 }
 ```
 
-You can also query MaizAI's RAG by ussing the `embedding match` command:
+You can also query MaizAI's RAG by using the `embedding match` command. This can be helpful to validate that your RAG is returning proper information:
 
 ```
 maizai embedding match --input "Information about Mathieu Corbin" --limit 1 --model mistral-embed --provider mistral | jq
