@@ -6,6 +6,28 @@ services:
       POSTGRES_DB: appclacks
       POSTGRES_USER: appclacks
       POSTGRES_PASSWORD: appclacks
-  jaeger:
-    image: "jaegertracing/jaeger:2.2.0"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # uncomment to add jaeger support
+  # jaeger:
+  #   image: "jaegertracing/jaeger:2.2.0"
+  #   network_mode: "host"
+  maizai:
+    image: "appclacks/maizai:latest"
     network_mode: "host"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MAIZAI_POSTGRESQL_USERNAME: appclacks
+      MAIZAI_POSTGRESQL_PASSWORD: appclacks
+      MAIZAI_POSTGRESQL_DATABASE: appclacks
+      MAIZAI_POSTGRESQL_HOST: 127.0.0.1
+      MAIZAI_POSTGRESQL_PORT: 5432
+      MAIZAI_POSTGRESQL_SSL_MODE: "disable"
+      # You should configure an AI provider: MAIZAI_ANTHROPIC_API_KEY for Anthropic, MAIZAI_MISTRAL_API_KEY for Mistral
+      # uncomment for tracing support
+      # OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://localhost:4318/v1/traces
