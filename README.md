@@ -28,11 +28,13 @@ Feel free to open issues if you want to see a new provider being supported.
 
 ## Getting started
 
-You need a [PostgreSQL](https://www.postgresql.org/) instance to run MaizAI.
+You need a [PostgreSQL](https://www.postgresql.org/) instance to run MaizAI, with the [pgvector](https://github.com/pgvector/pgvector) extension installed.
+
+You can run MaizAI using Docker (see the [https://github.com/appclacks/maizAI/blob/main/docker-compose.yaml](docker-compose file)) or using the [https://github.com/appclacks/maizAI/releases](prebuilt binaries).
 
 ### Configuration
 
-Here is the list of available environment variables to configure MaizAI
+Here is the list of available environment variables to configure MaizA
 
 | Env variable | Description | Default
 | --- | --- | --- |
