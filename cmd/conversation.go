@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/appclacks/maizai/internal/http/client"
 	"github.com/spf13/cobra"
@@ -48,6 +49,9 @@ If a context ID is provided, it will be used as input for the conversation. Else
 					Model:    ragModel,
 					Limit:    int32(ragLimit),
 				},
+			}
+			if contextName == "" && contextID == "" {
+				contextName = fmt.Sprintf("context-%d", time.Now().Unix())
 			}
 			contextOptions := client.ContextOptions{
 				Name:        contextName,
