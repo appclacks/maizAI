@@ -28,7 +28,7 @@ type ContextOptions struct {
 
 type CreateConversationInput struct {
 	QueryOptions      QueryOptions   `json:"query-options" description:"The conversation query options"`
-	Prompt            string         `json:"prompt" required:"true" description:"The prompt that will be passed to the AI provider"`
+	Messages          []NewMessage   `json:"messages" required:"true" description:"The messages to provide the the AI provider"`
 	ContextID         string         `json:"context-id,omitempty" description:"The ID of an existing context to use for this conversation"`
 	NewContextOptions ContextOptions `json:"new-context" description:"Options to create a new context"`
 	Stream            bool           `json:"stream" description:"Streaming mode using SSE"`

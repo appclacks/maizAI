@@ -18,10 +18,17 @@ func (b *Builder) Conversation(ec echo.Context) error {
 		return err
 	}
 
-	messages, err := shared.NewUserMessages(payload.Prompt)
-	if err != nil {
-		return err
+	messages := []shared.Message{}
+
+	for _, m := range payload.Messages {
+		msg, err := shared.NewMessage(m.Role, m.Content)
+		if err != nil {
+			return err
+		}
+		messages = append(messages, *msg)
 	}
+	fmt.Printf("%+v\n", messages)
+
 	ctx := ec.Request().Context()
 	queryOpts := aggregates.QueryOptions{
 		Model:       payload.QueryOptions.Model,

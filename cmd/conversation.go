@@ -15,7 +15,7 @@ import (
 func buildConversationCmd() *cobra.Command {
 	var sourcesContext []string
 	var model string
-	var prompt string
+	var messages []string
 	var aiProvider string
 	var system string
 	var temperature float64
@@ -64,7 +64,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 			input := &client.CreateConversationInput{
 				QueryOptions:      options,
 				NewContextOptions: contextOptions,
-				Prompt:            prompt,
+				Messages:          toMessages(messages),
 			}
 			if interactive {
 				input.Stream = stream
@@ -80,7 +80,12 @@ If a context ID is provided, it will be used as input for the conversation. Else
 					if prompt == "exit" || prompt == "exit\n" {
 						return
 					}
-					input.Prompt = prompt
+					input.Messages = []client.NewMessage{
+						{
+							Role:    "user",
+							Content: prompt,
+						},
+					}
 					if stream {
 						eventChan, err := c.StreamConversation(ctx, *input)
 						exitIfError(err)
@@ -123,7 +128,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	err := cmd.MarkPersistentFlagRequired("model")
 	exitIfError(err)
 
-	cmd.PersistentFlags().StringVar(&prompt, "prompt", "", "The prompt to send to the AI provider. You can use the {maizai_rag_data} placeholder: it will be replaced by RAG data if a rag input is provided")
+	cmd.PersistentFlags().StringSliceVar(&messages, "message", []string{}, "The messages to send to the AI provider. You can use the {maizai_rag_data} placeholder: it will be replaced by RAG data if a rag input is provided")
 
 	cmd.PersistentFlags().StringVar(&aiProvider, "provider", "", "AI provider to use")
 	err = cmd.MarkPersistentFlagRequired("provider")
