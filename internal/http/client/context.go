@@ -45,14 +45,14 @@ type Message struct {
 	CreatedAt time.Time `json:"created-at" description:"The message creation date"`
 }
 
-type CreateContextMessage struct {
+type NewMessage struct {
 	Role    string `json:"role" required:"true" description:"The message role"`
 	Content string `json:"content" required:"true" description:"The message content"`
 }
 
 type AddMessagesToContextInput struct {
 	ID       string `json:"-" param:"id" path:"id"`
-	Messages []CreateContextMessage
+	Messages []NewMessage
 }
 
 type UpdateContextMessageInput struct {
@@ -66,10 +66,10 @@ type DeleteContextMessageInput struct {
 }
 
 type CreateContextInput struct {
-	Name        string                 `json:"name" required:"true" description:"The context name"`
-	Description string                 `json:"description" description:"The context description"`
-	Sources     shared.ContextSources  `json:"sources" description:"Sources for this context"`
-	Messages    []CreateContextMessage `json:"messages" description:"messages attached to this context"`
+	Name        string                `json:"name" required:"true" description:"The context name"`
+	Description string                `json:"description" description:"The context description"`
+	Sources     shared.ContextSources `json:"sources" description:"Sources for this context"`
+	Messages    []NewMessage          `json:"messages" description:"messages attached to this context"`
 }
 
 type DeleteContextSourceContextInput struct {

@@ -122,19 +122,19 @@ func contextSourceContextAddCmd() *cobra.Command {
 	return cmd
 }
 
-func toMessage(input string) client.CreateContextMessage {
+func toMessage(input string) client.NewMessage {
 	role, content, found := strings.Cut(input, ":")
 	if !found {
 		exitIfError(errors.New("Contexts messages should start with the role to use for this message"))
 	}
-	return client.CreateContextMessage{
+	return client.NewMessage{
 		Role:    role,
 		Content: content,
 	}
 }
 
-func toMessages(inputs []string) []client.CreateContextMessage {
-	result := []client.CreateContextMessage{}
+func toMessages(inputs []string) []client.NewMessage {
+	result := []client.NewMessage{}
 	for _, message := range inputs {
 		result = append(result, toMessage(message))
 	}
