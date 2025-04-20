@@ -131,7 +131,6 @@ func (a *Assistant) EnrichWithRag(ctx context.Context, messages []shared.Message
 		result = append(result, message)
 	}
 	return result, nil
-
 }
 
 func (a *Assistant) Pipeline(

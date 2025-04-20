@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/appclacks/maizai/internal/http/client"
@@ -28,21 +29,37 @@ func contextListCmd() *cobra.Command {
 
 func contextGetCmd() *cobra.Command {
 	var id string
+	var name string
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get a context by ID",
+		Short: "Get a context by ID or name",
 		Run: func(cmd *cobra.Command, args []string) {
+			if id == "" && name == "" {
+				exitIfError(errors.New("the command expects either a context id or name as input"))
+			}
 			client, err := client.New()
 			exitIfError(err)
 			ctx := context.Background()
-			context, err := client.GetContext(ctx, id)
-			exitIfError(err)
-			printJson(*context)
+			if id != "" {
+				context, err := client.GetContext(ctx, id)
+				exitIfError(err)
+				printJson(*context)
+			} else {
+				contexts, err := client.ListContexts(ctx)
+				exitIfError(err)
+				for _, context := range contexts.Contexts {
+					if context.Name == name {
+						printJson(context)
+						return
+					}
+				}
+				exitIfError(fmt.Errorf("context %s not found", name))
+			}
+
 		},
 	}
 	cmd.PersistentFlags().StringVar(&id, "id", "", "The ID of the context to retrieve")
-	err := cmd.MarkPersistentFlagRequired("id")
-	exitIfError(err)
+	cmd.PersistentFlags().StringVar(&name, "name", "", "The name of the context to retrieve")
 	return cmd
 }
 
