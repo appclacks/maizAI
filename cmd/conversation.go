@@ -128,7 +128,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	err := cmd.MarkPersistentFlagRequired("model")
 	exitIfError(err)
 
-	cmd.PersistentFlags().StringSliceVar(&messages, "message", []string{}, "The messages to send to the AI provider. You can use the {maizai_rag_data} placeholder: it will be replaced by RAG data if a rag input is provided")
+	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "The messages to send to the AI provider. You can use the {maizai_rag_data} placeholder: it will be replaced by RAG data if a rag input is provided")
 
 	cmd.PersistentFlags().StringVar(&aiProvider, "provider", "", "AI provider to use")
 	err = cmd.MarkPersistentFlagRequired("provider")
@@ -139,7 +139,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	cmd.PersistentFlags().StringVar(&contextName, "context-name", "", "The name of the new context that will be created for this conversation if a context ID is not provided")
 	cmd.PersistentFlags().Float64Var(&temperature, "temperature", 0, "Temperature")
 	cmd.PersistentFlags().Uint64Var(&maxTokens, "max-tokens", 8192, "Maximum tokens on the answer")
-	cmd.PersistentFlags().StringSliceVar(&sourcesContext, "source-context", []string{}, "Contexts to load")
+	cmd.PersistentFlags().StringArrayVar(&sourcesContext, "source-context", []string{}, "Contexts to load")
 	cmd.PersistentFlags().BoolVar(&interactive, "interactive", false, "Starts an interactive conversation")
 	cmd.PersistentFlags().BoolVar(&stream, "stream", false, "Streams the conversation")
 	cmd.PersistentFlags().StringVar(&ragInput, "rag-input", "", "Input to use to fetch data from MaiZAI RAG")

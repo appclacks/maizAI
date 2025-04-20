@@ -163,7 +163,7 @@ func addMessagesToContextCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&id, "id", "", "The context ID")
 	err := cmd.MarkPersistentFlagRequired("id")
 	exitIfError(err)
-	cmd.PersistentFlags().StringSliceVar(&messages, "message", []string{}, "Messages to add to this context")
+	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context")
 	return cmd
 }
 
@@ -249,8 +249,8 @@ func contextCreateCmd() *cobra.Command {
 	err := cmd.MarkPersistentFlagRequired("name")
 	exitIfError(err)
 	cmd.PersistentFlags().StringVar(&description, "description", "", "The description of the new context")
-	cmd.PersistentFlags().StringSliceVar(&sourcesContext, "source-context", []string{}, "IDs of contexts to use as source for this context")
-	cmd.PersistentFlags().StringSliceVar(&messages, "message", []string{}, "Messages to add to this context")
+	cmd.PersistentFlags().StringArrayVar(&sourcesContext, "source-context", []string{}, "IDs of contexts to use as source for this context")
+	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context")
 	return cmd
 }
 
@@ -286,8 +286,8 @@ func contextCreateCmd() *cobra.Command {
 // 			exitIfError(err)
 // 		},
 // 	}
-// 	cmd.PersistentFlags().StringSliceVar(&files, "file", []string{}, "File to include in the context")
-// 	cmd.PersistentFlags().StringSliceVar(&directories, "directory", []string{}, "Directory to include in the context")
+// 	cmd.PersistentFlags().StringArrayVar(&files, "file", []string{}, "File to include in the context")
+// 	cmd.PersistentFlags().StringArrayVar(&directories, "directory", []string{}, "Directory to include in the context")
 
 // 	cmd.PersistentFlags().StringVar(&name, "name", "", "The name of the new context")
 // 	err := cmd.MarkPersistentFlagRequired("name")
