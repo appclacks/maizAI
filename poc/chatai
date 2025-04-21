@@ -1,0 +1,6 @@
+#!/bin/bash
+
+maizai conversation \
+       --provider anthropic \
+       --model claude-3-7-sonnet-latest \
+       --interactive
