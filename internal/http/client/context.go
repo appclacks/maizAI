@@ -108,6 +108,25 @@ func (c *Client) GetContext(ctx context.Context, id string) (*Context, error) {
 	return &result, nil
 }
 
+func (c *Client) GetContextByName(ctx context.Context, name string) (*Context, error) {
+	contexts, err := c.ListContexts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, context := range contexts.Contexts {
+		if context.Name == name {
+			id := context.ID
+			var result Context
+			_, err := c.sendRequest(ctx, fmt.Sprintf("/api/v1/context/%s", id), http.MethodGet, nil, &result, nil)
+			if err != nil {
+				return nil, err
+			}
+			return &result, nil
+		}
+	}
+	return nil, fmt.Errorf("context %s not found", name)
+}
+
 func (c *Client) DeleteContext(ctx context.Context, id string) (*Response, error) {
 	var result Response
 	_, err := c.sendRequest(ctx, fmt.Sprintf("/api/v1/context/%s", id), http.MethodDelete, nil, &result, nil)

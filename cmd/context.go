@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/appclacks/maizai/internal/http/client"
@@ -45,15 +44,9 @@ func contextGetCmd() *cobra.Command {
 				exitIfError(err)
 				printJson(*context)
 			} else {
-				contexts, err := client.ListContexts(ctx)
+				context, err := client.GetContextByName(ctx, name)
 				exitIfError(err)
-				for _, context := range contexts.Contexts {
-					if context.Name == name {
-						printJson(context)
-						return
-					}
-				}
-				exitIfError(fmt.Errorf("context %s not found", name))
+				printJson(*context)
 			}
 
 		},
