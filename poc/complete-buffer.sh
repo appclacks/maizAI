@@ -12,12 +12,16 @@ EOF
 prompt=$1
 fileName=$2
 args=()
+args+=(--provider $PROVIDER)
+args+=(--model $MODEL)
 
 echo "source context: '${SOURCE_CONTEXT}'"
 if [ ! -z "${SOURCE_CONTEXT}" ]; then
     sourceContextID=$(maizai context get --name "$SOURCE_CONTEXT" | jq -r '.id')
     args+=(--source-context $sourceContextID)
 fi
+
+
 
 echo "pass file content: '${PASS_FILE_CONTENT}'"
 if [ "${PASS_FILE_CONTENT}" == "true" ]; then
@@ -32,8 +36,6 @@ echo "Updating file $fileName..."
 start=`date +%s`
 
 maizai conversation \
-       --provider anthropic \
-       --model claude-3-7-sonnet-latest \
        --system "${system}" \
        --message "user:$prompt" \
        "${args[@]}" | jq -r '.result.[0].text' >> $fileName
