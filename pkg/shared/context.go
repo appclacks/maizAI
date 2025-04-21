@@ -48,7 +48,7 @@ func (m Message) Validate() error {
 		return errors.New("A role is mandatory for the message")
 	}
 	if m.Role != UserRole && m.Role != AssistantRole {
-		return fmt.Errorf("The message role should be %s or %s", UserRole, AssistantRole)
+		return fmt.Errorf("Invalid value for role %s: The message role should be %s or %s", m.Role, UserRole, AssistantRole)
 	}
 	if m.Content == "" {
 		return errors.New("Message content can't be empty")
