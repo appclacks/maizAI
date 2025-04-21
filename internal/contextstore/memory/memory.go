@@ -120,6 +120,17 @@ func (m *MemoryContextStore) DeleteContextMessage(ctx context.Context, messageID
 	return nil
 }
 
+func (m *MemoryContextStore) DeleteContextMessages(ctx context.Context, contextID string) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	context, found := m.state[contextID]
+	if !found {
+		return fmt.Errorf("context %s doesn't exist", contextID)
+	}
+	context.Messages = []shared.Message{}
+	return nil
+}
+
 func (m *MemoryContextStore) DeleteContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()

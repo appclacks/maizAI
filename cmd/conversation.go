@@ -51,7 +51,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 				},
 			}
 			if contextName == "" && contextID == "" {
-				contextName = fmt.Sprintf("context-%d", time.Now().Unix())
+				contextName = fmt.Sprintf("context-auto-%d", time.Now().Unix())
 			}
 			contextOptions := client.ContextOptions{
 				Name:        contextName,

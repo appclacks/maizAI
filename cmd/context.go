@@ -188,7 +188,7 @@ func deleteContextMessageCmd() *cobra.Command {
 	var id string
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete a messages For a given context",
+		Short: "Delete a messages for a given context",
 		Run: func(cmd *cobra.Command, args []string) {
 			c, err := client.New()
 			exitIfError(err)
@@ -202,6 +202,29 @@ func deleteContextMessageCmd() *cobra.Command {
 		},
 	}
 	cmd.PersistentFlags().StringVar(&id, "id", "", "The context message ID")
+	err := cmd.MarkPersistentFlagRequired("id")
+	exitIfError(err)
+	return cmd
+}
+
+func deleteContextMessagesCmd() *cobra.Command {
+	var id string
+	cmd := &cobra.Command{
+		Use:   "delete-all",
+		Short: "Delete all messages for a given context",
+		Run: func(cmd *cobra.Command, args []string) {
+			c, err := client.New()
+			exitIfError(err)
+			ctx := context.Background()
+			input := client.DeleteContextMessagesInput{
+				ID: id,
+			}
+			response, err := c.DeleteContextMessages(ctx, input)
+			exitIfError(err)
+			printJson(*response)
+		},
+	}
+	cmd.PersistentFlags().StringVar(&id, "id", "", "The context ID")
 	err := cmd.MarkPersistentFlagRequired("id")
 	exitIfError(err)
 	return cmd

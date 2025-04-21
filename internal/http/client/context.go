@@ -38,6 +38,10 @@ type DeleteContextInput struct {
 	ID string `param:"id" path:"id"`
 }
 
+type DeleteContextMessagesInput struct {
+	ID string `param:"id" path:"id"`
+}
+
 type Message struct {
 	ID        string    `json:"id" description:"The message ID"`
 	Role      string    `json:"role" description:"The message role"`
@@ -125,6 +129,15 @@ func (c *Client) CreateContext(ctx context.Context, input CreateContextInput) (*
 func (c *Client) AddMessagesToContext(ctx context.Context, input AddMessagesToContextInput) (*Response, error) {
 	var result Response
 	_, err := c.sendRequest(ctx, fmt.Sprintf("/api/v1/context/%s/message", input.ID), http.MethodPost, input, &result, nil)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (c *Client) DeleteContextMessages(ctx context.Context, input DeleteContextMessagesInput) (*Response, error) {
+	var result Response
+	_, err := c.sendRequest(ctx, fmt.Sprintf("/api/v1/context/%s/message", input.ID), http.MethodDelete, input, &result, nil)
 	if err != nil {
 		return nil, err
 	}

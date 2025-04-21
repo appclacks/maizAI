@@ -178,3 +178,15 @@ func (b *Builder) CreateContextSourceContext(ec echo.Context) error {
 	}
 	return ec.JSON(http.StatusOK, newResponse("Context source added"))
 }
+
+func (b *Builder) DeleteContextMessages(ec echo.Context) error {
+	var payload client.DeleteContextMessageInput
+	if err := ec.Bind(&payload); err != nil {
+		return err
+	}
+	err := b.ctxManager.DeleteContextMessages(ec.Request().Context(), payload.ID)
+	if err != nil {
+		return err
+	}
+	return ec.JSON(http.StatusOK, newResponse("Context messages deleted"))
+}

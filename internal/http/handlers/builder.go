@@ -24,6 +24,7 @@ type ContextManager interface {
 	UpdateContextMessage(ctx context.Context, messageID string, role string, content string) error
 	DeleteContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
 	CreateContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
+	DeleteContextMessages(ctx context.Context, contextID string) error
 }
 
 type Rag interface {

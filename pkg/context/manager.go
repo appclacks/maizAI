@@ -23,6 +23,7 @@ type ContextStore interface {
 	UpdateContextMessage(ctx context.Context, messageID string, role string, content string) error
 	DeleteContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
 	CreateContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
+	DeleteContextMessages(ctx context.Context, contextID string) error
 }
 
 type ContextManager struct {
@@ -155,4 +156,8 @@ func (c *ContextManager) CreateContextSourceContext(ctx context.Context, context
 	}
 
 	return c.store.CreateContextSourceContext(ctx, contextID, sourceContextID)
+}
+
+func (c *ContextManager) DeleteContextMessages(ctx context.Context, contextID string) error {
+	return c.store.DeleteContextMessages(ctx, contextID)
 }

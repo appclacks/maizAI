@@ -100,6 +100,7 @@ func Run() error {
 	contextMessageCmd.AddCommand(addMessagesToContextCmd())
 	contextMessageCmd.AddCommand(messageUpdateCmd())
 	contextMessageCmd.AddCommand(deleteContextMessageCmd())
+	contextMessageCmd.AddCommand(deleteContextMessagesCmd())
 	contextSourceCmd.AddCommand(contextSourceContextDeleteCmd())
 	contextSourceCmd.AddCommand(contextSourceContextAddCmd())
 

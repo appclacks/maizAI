@@ -238,3 +238,11 @@ func (c *Database) CreateContextSourceContext(ctx context.Context, contextID str
 		SourceContextID: pgxID(sourceContextID),
 	})
 }
+
+func (c *Database) DeleteContextMessages(ctx context.Context, contextID string) error {
+	err := c.queries.DeleteContextMessagesForContext(ctx, pgxID(contextID))
+	if err != nil {
+		return fmt.Errorf("failed to delete messages for context %s: %w", contextID, err)
+	}
+	return nil
+}

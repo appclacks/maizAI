@@ -146,6 +146,14 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 			description: "Add new messages for a given context",
 		},
 		{
+			path:        "/context/:id/message",
+			method:      http.MethodDelete,
+			handler:     builder.DeleteContextMessages,
+			payload:     client.DeleteContextMessagesInput{},
+			response:    client.Response{},
+			description: "Delete all messages for a given context",
+		},
+		{
 			path:        "/message/:id",
 			method:      http.MethodPut,
 			handler:     builder.UpdateContextMessage,
