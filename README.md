@@ -113,10 +113,10 @@ maizai context list
 
 MaizAI automatically created a context when interacting with the AI provider. You can also choose to use an existing context by passing a `--context-id` flag to the `maizai conversation` command instead of a context name. This also allows you to start a conversation when you stopped it at any time.
 
-You can also run non-interactive conversations by removing the `--interactive` flag and by passing your prompt using `--prompt`:
+You can also run non-interactive conversations by removing the `--interactive` flag and by passing your prompt using `--message`:
 
 ```
-maizai conversation --provider mistral --model mistral-small-latest --system "you're a general purpose AI assistant" --context-name "my-context" --prompt "Why is the sky blue?"
+maizai conversation --provider mistral --model mistral-small-latest --system "you're a general purpose AI assistant" --context-name "my-context" --message "user:Why is the sky blue?"
 
 ```json
 {
@@ -244,7 +244,7 @@ maizai conversation
   --rag-provider mistral
   --rag-limit 1
   --rag-input "Information about Mathieu Corbin"
-  --prompt "Who is Mathieu Corbin? Use this context to help you: {maizai_rag_data}"
+  --message "user:Who is Mathieu Corbin? Use this context to help you: {maizai_rag_data}"
 
 {
   "result": [

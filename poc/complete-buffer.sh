@@ -10,7 +10,7 @@ EOF
 )
 
 prompt=$1
-fileName=$2
+filePath=$2
 args=()
 args+=(--provider $PROVIDER)
 args+=(--model $MODEL)
@@ -25,20 +25,19 @@ fi
 
 echo "pass file content: '${PASS_FILE_CONTENT}'"
 if [ "${PASS_FILE_CONTENT}" == "true" ]; then
-    fileContent=$(cat $fileName)
-    args+=(--message "assistant:$fileContent")
+    args+=(--message-from-file "assistant:$filePath")
 fi
 
 echo $(date)
 #echo "args: ${args[@]}"
 echo
-echo "Updating file $fileName..."
+echo "Updating file $filePath..."
 start=`date +%s`
 
 maizai conversation \
        --system "${system}" \
        --message "user:$prompt" \
-       "${args[@]}" | jq -r '.result.[0].text' >> $fileName
+       "${args[@]}" | jq -r '.result.[0].text' >> $filePath
 
 echo
 end=`date +%s`
