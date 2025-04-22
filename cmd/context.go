@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/appclacks/maizai/internal/http/client"
@@ -154,6 +156,7 @@ func toMessages(inputs []string) []client.NewMessage {
 func addMessagesToContextCmd() *cobra.Command {
 	var id string
 	var messages []string
+	var files []string
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Add messages to a given context",
@@ -161,9 +164,24 @@ func addMessagesToContextCmd() *cobra.Command {
 			c, err := client.New()
 			exitIfError(err)
 			ctx := context.Background()
+			messages := toMessages(messages)
+			for _, input := range files {
+				role, path, found := strings.Cut(input, ":")
+				if !found {
+					exitIfError(errors.New("files paths should start with the role to use"))
+				}
+				content, err := os.ReadFile(path)
+				if err != nil {
+					exitIfError(fmt.Errorf("fail to read file %s: %w", path, err))
+				}
+				messages = append(messages, client.NewMessage{
+					Role:    role,
+					Content: string(content),
+				})
+			}
 			input := client.AddMessagesToContextInput{
 				ID:       id,
-				Messages: toMessages(messages),
+				Messages: messages,
 			}
 			response, err := c.AddMessagesToContext(ctx, input)
 			exitIfError(err)
@@ -173,7 +191,8 @@ func addMessagesToContextCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&id, "id", "", "The context ID")
 	err := cmd.MarkPersistentFlagRequired("id")
 	exitIfError(err)
-	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context")
+	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context. They should be prefixed by the role name (example: user:hello-world)")
+	cmd.PersistentFlags().StringArrayVar(&files, "file", []string{}, "A list of files paths, the content will be added to the context. They should be prefixed by the role name (example: user:/my/file)")
 	return cmd
 }
 
