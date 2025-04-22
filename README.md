@@ -15,6 +15,8 @@ Key features:
 - Extensible: adding more AI or embedding providers is easy
 - A CLI to easily interact with MaizAI API
 
+This [this article](https://mcorbin.fr/posts/2025-04-13-maizai-ai-toolbox/) explaining why I built this tool.
+
 ## Supported AI providers
 
 In order to use MaizAI, you need to configure at least one AI provider. If you want to use MaizAI RAG feature, you need at least one provider supporting embedding.
