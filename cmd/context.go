@@ -192,7 +192,7 @@ func addMessagesToContextCmd() *cobra.Command {
 	err := cmd.MarkPersistentFlagRequired("id")
 	exitIfError(err)
 	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context. They should be prefixed by the role name (example: user:hello-world)")
-	cmd.PersistentFlags().StringArrayVar(&files, "file", []string{}, "A list of files paths, the content will be added to the context. They should be prefixed by the role name (example: user:/my/file)")
+	cmd.PersistentFlags().StringArrayVar(&files, "message-from-file", []string{}, "A list of files paths, the content will be added to the context. They should be prefixed by the role name (example: user:/my/file)")
 	return cmd
 }
 

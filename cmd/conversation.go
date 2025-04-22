@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ func buildConversationCmd() *cobra.Command {
 	var sourcesContext []string
 	var model string
 	var messages []string
+	var fileMessages []string
 	var aiProvider string
 	var system string
 	var temperature float64
@@ -60,11 +62,25 @@ If a context ID is provided, it will be used as input for the conversation. Else
 					Contexts: sourcesContext,
 				},
 			}
-
+			msg := toMessages(messages)
+			for _, input := range fileMessages {
+				role, path, found := strings.Cut(input, ":")
+				if !found {
+					exitIfError(errors.New("files paths should start with the role to use"))
+				}
+				content, err := os.ReadFile(path)
+				if err != nil {
+					exitIfError(fmt.Errorf("fail to read file %s: %w", path, err))
+				}
+				msg = append(msg, client.NewMessage{
+					Role:    role,
+					Content: string(content),
+				})
+			}
 			input := &client.CreateConversationInput{
 				QueryOptions:      options,
 				NewContextOptions: contextOptions,
-				Messages:          toMessages(messages),
+				Messages:          msg,
 			}
 			if interactive {
 				input.Stream = stream
@@ -129,6 +145,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	exitIfError(err)
 
 	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "The messages to send to the AI provider. You can use the {maizai_rag_data} placeholder: it will be replaced by RAG data if a rag input is provided")
+	cmd.PersistentFlags().StringArrayVar(&fileMessages, "message-from-file", []string{}, "A list of files paths, the content will be added to the context. They should be prefixed by the role name (example: user:/my/file)")
 
 	cmd.PersistentFlags().StringVar(&aiProvider, "provider", "", "AI provider to use")
 	err = cmd.MarkPersistentFlagRequired("provider")
