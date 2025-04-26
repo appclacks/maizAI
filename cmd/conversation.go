@@ -14,7 +14,8 @@ import (
 )
 
 func buildConversationCmd() *cobra.Command {
-	var sourcesContext []string
+	var sourcesContextID []string
+	var sourcesContextName []string
 	var model string
 	var messages []string
 	var fileMessages []string
@@ -64,11 +65,16 @@ If a context ID is provided, it will be used as input for the conversation. Else
 			if newContextName == "" && contextID == "" {
 				newContextName = fmt.Sprintf("context-auto-%d", time.Now().Unix())
 			}
+			for _, ctxName := range sourcesContextName {
+				context, err := c.GetContextByName(ctx, ctxName)
+				exitIfError(err)
+				sourcesContextID = append(sourcesContextID, context.ID)
+			}
 			contextOptions := client.ContextOptions{
 				Name:        newContextName,
 				Description: newContextDescription,
 				Sources: client.ContextSources{
-					Contexts: sourcesContext,
+					Contexts: sourcesContextID,
 				},
 			}
 			msg := toMessages(messages)
@@ -167,7 +173,8 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	cmd.PersistentFlags().StringVar(&newContextDescription, "new-context-description", "", "The description of the new context that will be created for this conversation if a context ID is not provided")
 	cmd.PersistentFlags().Float64Var(&temperature, "temperature", 0, "Temperature")
 	cmd.PersistentFlags().Uint64Var(&maxTokens, "max-tokens", 8192, "Maximum tokens on the answer")
-	cmd.PersistentFlags().StringArrayVar(&sourcesContext, "source-context", []string{}, "Contexts to load")
+	cmd.PersistentFlags().StringArrayVar(&sourcesContextID, "source-context-id", []string{}, "ID of a context to use as source")
+	cmd.PersistentFlags().StringArrayVar(&sourcesContextName, "source-context-name", []string{}, "name of a context to use as source")
 	cmd.PersistentFlags().BoolVar(&interactive, "interactive", false, "Starts an interactive conversation")
 	cmd.PersistentFlags().BoolVar(&stream, "stream", false, "Streams the conversation")
 	cmd.PersistentFlags().StringVar(&ragInput, "rag-input", "", "Input to use to fetch data from MaiZAI RAG")
