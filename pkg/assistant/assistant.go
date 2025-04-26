@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var ragPlaceholder = "{maizai_rag_data}"
+var ragPlaceholder = "{ragdata}"
 
 type Provider interface {
 	Query(ctx context.Context, messages []shared.Message, options aggregates.QueryOptions) (*aggregates.Answer, error)

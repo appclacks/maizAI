@@ -63,7 +63,7 @@ func TestPipeline(t *testing.T) {
 		{
 			ID:        uuid.NewString(),
 			Role:      shared.UserRole,
-			Content:   "message1 {maizai_rag_data}",
+			Content:   "message1 {ragdata}",
 			CreatedAt: time.Now().UTC(),
 		},
 	}

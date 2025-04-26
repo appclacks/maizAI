@@ -234,7 +234,7 @@ In the background, MaizAI will:
 
 The CLI (and MaizAI API) allows you to manage chunks: listing chunks for a document using `maizai document list-chunks`.
 
-You can now query the rag using the conversation API. In this example, we ask the RAG information about Mathieu Corbin, and limit the number of chunks returned to 1. The data retrieved will replace the `{maizai_rag_data}` placeholder in the prompt.
+You can now query the rag using the conversation API. In this example, we ask the RAG information about Mathieu Corbin, and limit the number of chunks returned to 1. The data retrieved will replace the `{ragdata}` placeholder in the prompt.
 
 ```
 maizai conversation
@@ -246,7 +246,7 @@ maizai conversation
   --rag-provider mistral
   --rag-limit 1
   --rag-input "Information about Mathieu Corbin"
-  --message "user:Who is Mathieu Corbin? Use this context to help you: {maizai_rag_data}"
+  --message "user:Who is Mathieu Corbin? Use this context to help you: {ragdata}"
 
 {
   "result": [
