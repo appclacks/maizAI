@@ -23,8 +23,9 @@ func buildConversationCmd() *cobra.Command {
 	var temperature float64
 	var maxTokens uint64
 	var contextID string
+	var newContextName string
 	var contextName string
-	var contextDescription string
+	var newContextDescription string
 	var interactive bool
 	var stream bool
 	var ragInput string
@@ -52,12 +53,20 @@ If a context ID is provided, it will be used as input for the conversation. Else
 					Limit:    int32(ragLimit),
 				},
 			}
-			if contextName == "" && contextID == "" {
-				contextName = fmt.Sprintf("context-auto-%d", time.Now().Unix())
+			if contextID != "" && contextName != "" {
+				exitIfError(errors.New("You shoulh pass either a context ID or a context name"))
+			}
+			if contextName != "" {
+				context, err := c.GetContextByName(ctx, contextName)
+				exitIfError(err)
+				contextID = context.ID
+			}
+			if newContextName == "" && contextID == "" {
+				newContextName = fmt.Sprintf("context-auto-%d", time.Now().Unix())
 			}
 			contextOptions := client.ContextOptions{
-				Name:        contextName,
-				Description: contextDescription,
+				Name:        newContextName,
+				Description: newContextDescription,
 				Sources: client.ContextSources{
 					Contexts: sourcesContext,
 				},
@@ -152,8 +161,10 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	exitIfError(err)
 
 	cmd.PersistentFlags().StringVar(&system, "system", "", "System promt for the AI provider")
-	cmd.PersistentFlags().StringVar(&contextID, "context-id", "", "The ID of the new context to reuse for this conversation")
-	cmd.PersistentFlags().StringVar(&contextName, "context-name", "", "The name of the new context that will be created for this conversation if a context ID is not provided")
+	cmd.PersistentFlags().StringVar(&contextID, "context-id", "", "The ID of the context to reuse for this conversation")
+	cmd.PersistentFlags().StringVar(&contextName, "context-name", "", "The name of the context to reuse for this conversation")
+	cmd.PersistentFlags().StringVar(&newContextName, "new-context-name", "", "The name of the new context that will be created for this conversation if a context ID is not provided")
+	cmd.PersistentFlags().StringVar(&newContextDescription, "new-context-description", "", "The description of the new context that will be created for this conversation if a context ID is not provided")
 	cmd.PersistentFlags().Float64Var(&temperature, "temperature", 0, "Temperature")
 	cmd.PersistentFlags().Uint64Var(&maxTokens, "max-tokens", 8192, "Maximum tokens on the answer")
 	cmd.PersistentFlags().StringArrayVar(&sourcesContext, "source-context", []string{}, "Contexts to load")
