@@ -84,7 +84,7 @@ maizai conversation \
   --model mistral-small-latest \
   --system "you're a general purpose AI assistant" \
   --interactive \
-  --context-name "my-context"
+  --new-context-name "my-context"
 Hello, I'm your AI assistant. Ask me anything:
 
 Why is the sky blue?
@@ -113,12 +113,12 @@ maizai context list
 }
 ```
 
-MaizAI automatically created a context when interacting with the AI provider. You can also choose to use an existing context by passing a `--context-id` flag to the `maizai conversation` command instead of a context name. This also allows you to start a conversation when you stopped it at any time.
+MaizAI automatically created a context when interacting with the AI provider. You can also choose to use an existing context by passing a `--context-id` (or `--context-name`) flag to the `maizai conversation` command instead of a context name. This also allows you to start a conversation when you stopped it at any time.
 
 You can also run non-interactive conversations by removing the `--interactive` flag and by passing your prompt using `--message`:
 
 ```
-maizai conversation --provider mistral --model mistral-small-latest --system "you're a general purpose AI assistant" --context-name "my-context" --message "user:Why is the sky blue?"
+maizai conversation --provider mistral --model mistral-small-latest --system "you're a general purpose AI assistant" --new-context-name "my-context" --message "user:Why is the sky blue?"
 
 ```json
 {
@@ -190,6 +190,8 @@ maizai context source add-context --id 01eff873-1e30-65de-8980-a6567a017827 --so
 {"messages":["Context source added"]}
 ```
 
+You can also use `--source-context-name` to reference a context by name.
+
 If you list contexts again, you'll see that our first context now has a source:
 
 ```json
@@ -241,7 +243,7 @@ maizai conversation
   --provider mistral
   --model mistral-small-latest
   --system "you're a general purpose AI assistant"
-  --context-name "context-with-rag"
+  --new-context-name "context-with-rag"
   --rag-model mistral-embed
   --rag-provider mistral
   --rag-limit 1
