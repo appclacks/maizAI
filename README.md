@@ -6,7 +6,7 @@ I built MaizAI to be able to easily build AI agents through simple HTTP calls, w
 
 Key features:
 
-- API-first (see OpenAPI spec)
+- API-first (see [OpenAPI spec](https://github.com/appclacks/maizAI/tree/main/doc))
 - Contexts management: Create, update, delete contexts and use them when sending queries to AI providers. MaiZAI also supports dependencies between contexts to favor contexts reusing across messages.
 - Streaming support (using SSE)
 - RAG support using [pgvector](https://github.com/pgvector/pgvector), with an API to generate vectors from text: send text data and the embedding provider and model to use, and MaiZAI will take care of querying the embedding provider and store the result for later use
