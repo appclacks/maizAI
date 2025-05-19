@@ -123,7 +123,7 @@ func pgxTime(t time.Time) pgtype.Timestamp {
 }
 
 func (c *Database) beginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, *queries.Queries, func(), error) {
-	tx, err := c.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := c.conn.BeginTx(ctx, options)
 	if err != nil {
 		return nil, nil, nil, err
 	}

@@ -24,6 +24,11 @@ type ContextStore interface {
 	DeleteContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
 	CreateContextSourceContext(ctx context.Context, contextID string, sourceContextID string) error
 	DeleteContextMessages(ctx context.Context, contextID string) error
+	CreateSystemPrompt(ctx context.Context, prompt shared.SystemPrompt) error
+	GetSystemPrompt(ctx context.Context, id string) (*shared.SystemPrompt, error)
+	ListSystemPrompts(ctx context.Context) ([]shared.SystemPrompt, error)
+	DeleteSystemPrompt(ctx context.Context, id string) error
+	UpdateSystemPrompt(ctx context.Context, id string, content string) error
 }
 
 type ContextManager struct {

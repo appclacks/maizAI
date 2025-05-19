@@ -155,16 +155,26 @@ func toMessages(inputs []string) []client.NewMessage {
 
 func addMessagesToContextCmd() *cobra.Command {
 	var id string
+	var name string
 	var messages []string
 	var files []string
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Add messages to a given context",
 		Run: func(cmd *cobra.Command, args []string) {
+			if id == "" && name == "" {
+				exitIfError(errors.New("you should pass a context ID or a context name"))
+			}
 			c, err := client.New()
 			exitIfError(err)
 			ctx := context.Background()
 			messages := toMessages(messages)
+			if name != "" {
+				context, err := c.GetContextByName(ctx, name)
+				exitIfError(err)
+				id = context.ID
+			}
+
 			for _, input := range files {
 				role, path, found := strings.Cut(input, ":")
 				if !found {
@@ -188,9 +198,8 @@ func addMessagesToContextCmd() *cobra.Command {
 			printJson(*response)
 		},
 	}
-	cmd.PersistentFlags().StringVar(&id, "id", "", "The context ID")
-	err := cmd.MarkPersistentFlagRequired("id")
-	exitIfError(err)
+	cmd.PersistentFlags().StringVar(&id, "context-id", "", "The context ID")
+	cmd.PersistentFlags().StringVar(&name, "context-name", "", "The context name")
 	cmd.PersistentFlags().StringArrayVar(&messages, "message", []string{}, "Messages to add to this context. They should be prefixed by the role name (example: user:hello-world)")
 	cmd.PersistentFlags().StringArrayVar(&files, "message-from-file", []string{}, "A list of files paths, the content will be added to the context. They should be prefixed by the role name (example: user:/my/file)")
 	return cmd

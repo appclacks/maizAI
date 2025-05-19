@@ -45,3 +45,11 @@ type DocumentChunk struct {
 	Embedding  pgvector.Vector
 	CreatedAt  pgtype.Timestamp
 }
+
+type SystemPrompt struct {
+	ID          pgtype.UUID
+	Name        string
+	Description pgtype.Text
+	Content     string
+	CreatedAt   pgtype.Timestamp
+}

@@ -17,10 +17,8 @@ args+=(--model $MODEL)
 
 echo "source context: '${SOURCE_CONTEXT}'"
 if [ ! -z "${SOURCE_CONTEXT}" ]; then
-    sourceContextID=$(maizai context get --name "$SOURCE_CONTEXT" | jq -r '.id')
-    args+=(--source-context $sourceContextID)
+    args+=(--source-context-name "$SOURCE_CONTEXT")
 fi
-
 
 
 echo "pass file content: '${PASS_FILE_CONTENT}'"
