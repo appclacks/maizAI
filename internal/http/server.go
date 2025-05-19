@@ -233,6 +233,46 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 			response:    client.ListDocumentChunksOutput{},
 			description: "Return chunks matching the provided input",
 		},
+		{
+			path:        "/system-prompt",
+			method:      http.MethodGet,
+			handler:     builder.ListSystemPrompts,
+			payload:     nil,
+			response:    client.ListSystemPromptsOutput{},
+			description: "List system prompts",
+		},
+		{
+			path:        "/system-prompt/:id",
+			method:      http.MethodGet,
+			handler:     builder.GetSystemPrompt,
+			payload:     client.GetSystemPromptInput{},
+			response:    client.SystemPrompt{},
+			description: "Get a system prompt by ID",
+		},
+		{
+			path:        "/system-prompt",
+			method:      http.MethodPost,
+			handler:     builder.CreateSystemPrompt,
+			payload:     client.CreateSystemPromptInput{},
+			response:    client.Response{},
+			description: "Create a new system prompt",
+		},
+		{
+			path:        "/system-prompt/:id",
+			method:      http.MethodPut,
+			handler:     builder.UpdateSystemPrompt,
+			payload:     client.UpdateSystemPromptInput{},
+			response:    client.Response{},
+			description: "Update a system prompt",
+		},
+		{
+			path:        "/system-prompt/:id",
+			method:      http.MethodDelete,
+			handler:     builder.DeleteSystemPrompt,
+			payload:     client.DeleteSystemPromptInput{},
+			response:    client.Response{},
+			description: "Delete a system prompt by ID",
+		},
 	}
 
 	err = openapiSpec(e, definitions)

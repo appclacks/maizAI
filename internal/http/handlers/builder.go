@@ -38,6 +38,14 @@ type Rag interface {
 	ListDocumentChunksForDocument(ctx context.Context, id string) ([]rag.DocumentChunk, error)
 }
 
+type SystemPromptManager interface {
+	CreateSystemPrompt(ctx context.Context, prompt shared.SystemPrompt) error
+	GetSystemPrompt(ctx context.Context, id string) (*shared.SystemPrompt, error)
+	ListSystemPrompts(ctx context.Context) ([]shared.SystemPrompt, error)
+	UpdateSystemPrompt(ctx context.Context, id string, content string) error
+	DeleteSystemPrompt(ctx context.Context, id string) error
+}
+
 func newResponse(messages ...string) client.Response {
 	return client.Response{
 		Messages: messages,
@@ -45,15 +53,17 @@ func newResponse(messages ...string) client.Response {
 }
 
 type Builder struct {
-	assistant  Assistant
-	ctxManager ContextManager
-	ragManager Rag
+	assistant           Assistant
+	ctxManager          ContextManager
+	ragManager          Rag
+	systemPromptManager SystemPromptManager
 }
 
-func NewBuilder(assistant Assistant, ctxManager ContextManager, ragManager Rag) *Builder {
+func NewBuilder(assistant Assistant, ctxManager ContextManager, ragManager Rag, systemPromptManager SystemPromptManager) *Builder {
 	return &Builder{
-		assistant:  assistant,
-		ctxManager: ctxManager,
-		ragManager: ragManager,
+		assistant:           assistant,
+		ctxManager:          ctxManager,
+		ragManager:          ragManager,
+		systemPromptManager: systemPromptManager,
 	}
 }

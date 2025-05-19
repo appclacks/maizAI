@@ -82,6 +82,10 @@ func Run() error {
 		Use:   "embedding",
 		Short: "Embedding commands",
 	}
+	systemPromptCmd := &cobra.Command{
+		Use:   "system-prompt",
+		Short: "System prompt subcommands",
+	}
 	serverCmd := buildServerCmd()
 	embeddingCmd.AddCommand(embeddingMatchCmd())
 	documentCmd.AddCommand(documentListCmd())
@@ -103,6 +107,11 @@ func Run() error {
 	contextMessageCmd.AddCommand(deleteContextMessagesCmd())
 	contextSourceCmd.AddCommand(contextSourceContextDeleteCmd())
 	contextSourceCmd.AddCommand(contextSourceContextAddCmd())
+	systemPromptCmd.AddCommand(systemPromptListCmd())
+	systemPromptCmd.AddCommand(systemPromptGetCmd())
+	systemPromptCmd.AddCommand(systemPromptCreateCmd())
+	systemPromptCmd.AddCommand(systemPromptUpdateCmd())
+	systemPromptCmd.AddCommand(systemPromptDeleteCmd())
 
 	conversationCmd := buildConversationCmd()
 	rootCmd.AddCommand(embeddingCmd)
@@ -110,6 +119,7 @@ func Run() error {
 	rootCmd.AddCommand(documentChunkCmd)
 	rootCmd.AddCommand(conversationCmd)
 	rootCmd.AddCommand(contextCmd)
+	rootCmd.AddCommand(systemPromptCmd)
 	rootCmd.AddCommand(serverCmd)
 	shutdown, err := initOpentelemetry()
 	if err != nil {

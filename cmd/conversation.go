@@ -33,6 +33,7 @@ func buildConversationCmd() *cobra.Command {
 	var ragModel string
 	var ragProvider string
 	var ragLimit uint32
+	var systemPromptID string
 	cmd := &cobra.Command{
 		Use: "conversation",
 		Short: `Send a message to an AI provider.
@@ -96,6 +97,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 				QueryOptions:      options,
 				NewContextOptions: contextOptions,
 				Messages:          msg,
+				SystemPromptID:    systemPromptID,
 			}
 			if interactive {
 				input.Stream = stream
@@ -167,6 +169,7 @@ If a context ID is provided, it will be used as input for the conversation. Else
 	exitIfError(err)
 
 	cmd.PersistentFlags().StringVar(&system, "system", "", "System promt for the AI provider")
+	cmd.PersistentFlags().StringVar(&systemPromptID, "system-prompt-id", "", "ID of a system prompt to use (will be concatenated with --system if both are provided)")
 	cmd.PersistentFlags().StringVar(&contextID, "context-id", "", "The ID of the context to reuse for this conversation")
 	cmd.PersistentFlags().StringVar(&contextName, "context-name", "", "The name of the context to reuse for this conversation")
 	cmd.PersistentFlags().StringVar(&newContextName, "new-context-name", "", "The name of the new context that will be created for this conversation if a context ID is not provided")
