@@ -8,14 +8,20 @@ import (
 	"github.com/appclacks/maizai/internal/providers/anthropic"
 	"github.com/appclacks/maizai/internal/providers/mistral"
 	"github.com/appclacks/maizai/pkg/assistant"
+	"github.com/appclacks/maizai/pkg/tools"
+	"github.com/appclacks/maizai/pkg/tools/aggregates"
 )
 
 func BuildProviders(config config.ProvidersConfiguration) (map[string]assistant.Provider, error) {
+	listFiles := tools.ToolListFiles{}
+	tools := []aggregates.Tools{
+		&listFiles,
+	}
 	clients := make(map[string]assistant.Provider)
 	if config.Anthropic != "" {
 		anthropic := anthropic.New(anthropic.Config{
 			APIKey: config.Anthropic,
-		})
+		}, tools)
 		os.Unsetenv("MAIZAI_ANTHROPIC_API_KEY")
 		clients["anthropic"] = anthropic
 	}

@@ -25,8 +25,16 @@ func (q QueryOptions) Validate() error {
 	return nil
 }
 
+type ToolResult struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	InputJSON string `json:"input-json"`
+	Result    string `json:"result"`
+}
+
 type Result struct {
-	Text string `json:"text"`
+	Text       string     `json:"text"`
+	ToolResult ToolResult `json:"tool-result"`
 }
 
 type Answer struct {

@@ -2,6 +2,7 @@ package anthropic
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptrace"
@@ -11,6 +12,7 @@ import (
 	"github.com/appclacks/maizai/internal/otelspan"
 	"github.com/appclacks/maizai/pkg/assistant/aggregates"
 	"github.com/appclacks/maizai/pkg/shared"
+	taggregates "github.com/appclacks/maizai/pkg/tools/aggregates"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -20,13 +22,14 @@ import (
 
 type Client struct {
 	client *anthropic.Client
+	tools  []taggregates.Tools
 }
 
 type Config struct {
 	APIKey string
 }
 
-func New(config Config) *Client {
+func New(config Config, tools []taggregates.Tools) *Client {
 	httpClient := &http.Client{
 		Transport: otelhttp.NewTransport(
 			http.DefaultTransport,
@@ -41,6 +44,7 @@ func New(config Config) *Client {
 	)
 	return &Client{
 		client: &client,
+		tools:  tools,
 	}
 }
 
@@ -52,6 +56,21 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	span.SetAttributes(semconv.GenAIRequestModel(options.Model))
 	span.SetAttributes(semconv.GenAIRequestMaxTokens(int(options.MaxTokens)))
 	span.SetAttributes(semconv.GenAISystemAnthropic)
+	toolParams := []anthropic.ToolParam{}
+	for _, tool := range c.tools {
+		spec := tool.Spec()
+		toolParams = append(toolParams, anthropic.ToolParam{
+			Name:        spec.Name,
+			Description: anthropic.String(spec.Description),
+			InputSchema: anthropic.ToolInputSchemaParam{
+				Properties: spec.Properties,
+			},
+		})
+	}
+	tools := make([]anthropic.ToolUnionParam, len(toolParams))
+	for i, toolParam := range toolParams {
+		tools[i] = anthropic.ToolUnionParam{OfTool: &toolParam}
+	}
 	messagesParam := []anthropic.MessageParam{}
 	for _, message := range messages {
 		switch message.Role {
@@ -69,6 +88,7 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 		Model:     options.Model,
 		MaxTokens: int64(options.MaxTokens),
 		Messages:  messagesParam,
+		Tools:     tools,
 	}
 	if options.System != "" {
 		messageParam.System = []anthropic.TextBlockParam{
@@ -84,9 +104,27 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	result := []aggregates.Result{}
 
 	for _, m := range message.Content {
-		result = append(result, aggregates.Result{
-			Text: m.Text,
-		})
+		switch block := m.AsAny().(type) {
+		case anthropic.TextBlock:
+			result = append(result, aggregates.Result{
+				Text: m.Text,
+			})
+		case anthropic.ToolUseBlock:
+			inputJSON, err := json.Marshal(block.Input)
+			if err != nil {
+				return nil, err
+			}
+			toolResult, err := c.tools[0].Execute(string(inputJSON))
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, aggregates.Result{
+				ToolResult: aggregates.ToolResult{
+					ID:   block.ID,
+					Name: block.Name,
+				},
+			})
+		}
 	}
 	answer := aggregates.Answer{
 		Results:      result,
