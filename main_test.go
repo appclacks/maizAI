@@ -548,7 +548,7 @@ func TestIntegration(t *testing.T) {
 	rag := rag.New(db, embeddingClients)
 	ai := assistant.New(clients, manager, rag)
 
-	handlersBuilder := handlers.NewBuilder(ai, manager, rag)
+	handlersBuilder := handlers.NewBuilder(ai, manager, rag, db)
 	server, err := mhttp.New(config.HTTP, registry, handlersBuilder)
 	assert.NoError(t, err)
 

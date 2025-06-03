@@ -11,13 +11,38 @@ import (
 
 type MemoryContextStore struct {
 	state map[string]*shared.Context
-	lock  sync.RWMutex
+	//system map[string]*shared.SystemPrompt
+	lock sync.RWMutex
 }
 
 func New() *MemoryContextStore {
 	return &MemoryContextStore{
 		state: make(map[string]*shared.Context),
 	}
+}
+
+func (m *MemoryContextStore) CreateSystemPrompt(ctx context.Context, prompt shared.SystemPrompt) error {
+	return nil
+}
+
+func (m *MemoryContextStore) GetSystemPrompt(ctx context.Context, id string) (*shared.SystemPrompt, error) {
+	return nil, nil
+}
+
+func (m *MemoryContextStore) GetSystemPromptByName(ctx context.Context, name string) (*shared.SystemPrompt, error) {
+	return nil, nil
+}
+
+func (m *MemoryContextStore) ListSystemPrompts(ctx context.Context) ([]shared.SystemPrompt, error) {
+	return nil, nil
+}
+
+func (m *MemoryContextStore) UpdateSystemPrompt(ctx context.Context, id string, content string) error {
+	return nil
+}
+
+func (m *MemoryContextStore) DeleteSystemPrompt(ctx context.Context, id string) error {
+	return nil
 }
 
 func (m *MemoryContextStore) DeleteContext(ctx context.Context, id string) error {

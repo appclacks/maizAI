@@ -32,6 +32,7 @@ type CreateConversationInput struct {
 	ContextID         string         `json:"context-id,omitempty" description:"The ID of an existing context to use for this conversation"`
 	NewContextOptions ContextOptions `json:"new-context" description:"Options to create a new context"`
 	Stream            bool           `json:"stream" description:"Streaming mode using SSE"`
+	SystemPromptID    string         `json:"system-prompt-id,omitempty" description:"The ID of a system prompt to use for this conversation"`
 }
 
 type Result struct {

@@ -28,9 +28,23 @@ func (b *Builder) Conversation(ec echo.Context) error {
 	}
 
 	ctx := ec.Request().Context()
+
+	systemPrompt := payload.QueryOptions.System
+	if payload.SystemPromptID != "" {
+		prompt, err := b.systemPromptManager.GetSystemPrompt(ctx, payload.SystemPromptID)
+		if err != nil {
+			return err
+		}
+		if systemPrompt != "" {
+			systemPrompt = prompt.Content + "\n\n" + systemPrompt
+		} else {
+			systemPrompt = prompt.Content
+		}
+	}
+
 	queryOpts := aggregates.QueryOptions{
 		Model:       payload.QueryOptions.Model,
-		System:      payload.QueryOptions.System,
+		System:      systemPrompt,
 		Temperature: payload.QueryOptions.Temperature,
 		MaxTokens:   payload.QueryOptions.MaxTokens,
 		Provider:    payload.QueryOptions.Provider,

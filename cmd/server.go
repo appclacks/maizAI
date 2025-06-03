@@ -52,7 +52,7 @@ func RunServer() error {
 	rag := rag.New(db, embeddingProviders)
 	ai := assistant.New(clients, manager, rag)
 
-	handlersBuilder := handlers.NewBuilder(ai, manager, rag)
+	handlersBuilder := handlers.NewBuilder(ai, manager, rag, db)
 	server, err := http.New(config.HTTP, registry, handlersBuilder)
 	if err != nil {
 		return err

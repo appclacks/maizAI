@@ -60,6 +60,21 @@ paths:
                 $ref: '#/components/schemas/ClientContext'
           description: OK
   /api/v1/context/{id}/message:
+    delete:
+      description: Delete all messages for a given context
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
     post:
       description: Add new messages for a given context
       parameters:
@@ -293,6 +308,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/ClientResponse'
           description: OK
+  /api/v1/system-prompt:
+    get:
+      description: List system prompts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListSystemPromptsOutput'
+          description: OK
+    post:
+      description: Create a new system prompt
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreateSystemPromptInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+  /api/v1/system-prompt/{id}:
+    delete:
+      description: Delete a system prompt by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
+    get:
+      description: Get a system prompt by ID
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientSystemPrompt'
+          description: OK
+    put:
+      description: Update a system prompt
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientUpdateSystemPromptInput'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientResponse'
+          description: OK
 components:
   schemas:
     ClientContext:
@@ -384,7 +474,7 @@ components:
         messages:
           description: messages attached to this context
           items:
-            $ref: '#/components/schemas/ClientCreateContextMessage'
+            $ref: '#/components/schemas/ClientNewMessage'
           nullable: true
           type: array
         name:
@@ -395,35 +485,29 @@ components:
       required:
       - name
       type: object
-    ClientCreateContextMessage:
-      properties:
-        content:
-          description: The message content
-          type: string
-        role:
-          description: The message role
-          type: string
-      required:
-      - role
-      - content
-      type: object
     ClientCreateConversationInput:
       properties:
         context-id:
           description: The ID of an existing context to use for this conversation
           type: string
+        messages:
+          description: The messages to provide the the AI provider
+          items:
+            $ref: '#/components/schemas/ClientNewMessage'
+          nullable: true
+          type: array
         new-context:
           $ref: '#/components/schemas/ClientContextOptions'
-        prompt:
-          description: The prompt that will be passed to the AI provider
-          type: string
         query-options:
           $ref: '#/components/schemas/ClientQueryOptions'
         stream:
           description: Streaming mode using SSE
           type: boolean
+        system-prompt-id:
+          description: The ID of a system prompt to use for this conversation
+          type: string
       required:
-      - prompt
+      - messages
       type: object
     ClientCreateDocumentInput:
       properties:
@@ -433,6 +517,21 @@ components:
           type: string
       required:
       - name
+      type: object
+    ClientCreateSystemPromptInput:
+      properties:
+        content:
+          description: The system prompt content
+          type: string
+        description:
+          description: The system prompt description
+          type: string
+        name:
+          description: The system prompt name
+          type: string
+      required:
+      - name
+      - content
       type: object
     ClientDocument:
       properties:
@@ -506,6 +605,14 @@ components:
           nullable: true
           type: array
       type: object
+    ClientListSystemPromptsOutput:
+      properties:
+        system_prompts:
+          items:
+            $ref: '#/components/schemas/ClientSystemPrompt'
+          nullable: true
+          type: array
+      type: object
     ClientMessage:
       properties:
         content:
@@ -521,6 +628,18 @@ components:
         role:
           description: The message role
           type: string
+      type: object
+    ClientNewMessage:
+      properties:
+        content:
+          description: The message content
+          type: string
+        role:
+          description: The message role
+          type: string
+      required:
+      - role
+      - content
       type: object
     ClientQueryOptions:
       properties:
@@ -581,6 +700,25 @@ components:
         text:
           type: string
       type: object
+    ClientSystemPrompt:
+      properties:
+        content:
+          description: The system prompt content
+          type: string
+        created-at:
+          description: The system prompt creation date
+          format: date-time
+          type: string
+        description:
+          description: The system prompt description
+          type: string
+        id:
+          description: The system prompt ID
+          type: string
+        name:
+          description: The system prompt name
+          type: string
+      type: object
     ClientUpdateContextMessageInput:
       properties:
         content:
@@ -591,6 +729,14 @@ components:
           type: string
       required:
       - role
+      - content
+      type: object
+    ClientUpdateSystemPromptInput:
+      properties:
+        content:
+          description: The system prompt content
+          type: string
+      required:
       - content
       type: object
     SharedContextSources:
