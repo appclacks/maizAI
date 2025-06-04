@@ -11,11 +11,18 @@ import (
 
 const UserRole = "user"
 const AssistantRole = "assistant"
+const TextMessageType = "text"
+const ToolResultMessageType = "tool_result"
+const ToolUseMessageType = "tool_use"
 
 type Message struct {
 	ID        string    `json:"id"`
 	Role      string    `json:"role"`
 	Content   string    `json:"content"`
+	Type      string    `json:"type,omitempty"`
+	ToolName  string    `json:"tool-name,omitempty"`
+	ToolID    string    `json:"tool-id,omitempty"`
+	ToolInput string    `json:"tool-input,omitempty"`
 	CreatedAt time.Time `json:"created-at"`
 }
 
@@ -25,6 +32,7 @@ func NewMessage(role string, content string) (*Message, error) {
 		return nil, err
 	}
 	return &Message{
+		Type:      TextMessageType,
 		ID:        id.String(),
 		Role:      role,
 		Content:   content,

@@ -104,12 +104,25 @@ func (a *Assistant) UpdateContext(ctx context.Context, context string, messages 
 		if err != nil {
 			return err
 		}
-		update = append(update, shared.Message{
+		message := shared.Message{
 			ID:        id.String(),
 			CreatedAt: time.Now().UTC(),
 			Role:      shared.AssistantRole,
 			Content:   result.Text,
-		})
+			Type:      shared.TextMessageType,
+		}
+		if result.ToolUse.ID != "" {
+			message.Type = shared.ToolUseMessageType
+			message.ToolID = result.ToolUse.ID
+			message.ToolName = result.ToolUse.Name
+			message.ToolInput = result.ToolUse.InputJSON
+		}
+		if result.ToolResult.ID != "" {
+			message.Type = shared.ToolResultMessageType
+			message.ToolID = result.ToolUse.ID
+			message.Content = result.ToolResult.Content
+		}
+		update = append(update, message)
 	}
 	return a.ctxManager.AddMessagesToContext(ctx, context, update)
 }

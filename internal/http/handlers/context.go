@@ -39,6 +39,10 @@ func toClientContext(context shared.Context) client.Context {
 			Role:      message.Role,
 			Content:   message.Content,
 			CreatedAt: message.CreatedAt,
+			Type:      message.Type,
+			ToolName:  message.ToolName,
+			ToolID:    message.ToolID,
+			ToolInput: message.ToolInput,
 		})
 	}
 	return result

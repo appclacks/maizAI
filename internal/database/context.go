@@ -51,6 +51,10 @@ func (c *Database) CreateContext(ctx context.Context, context shared.Context) er
 			ctx,
 			queries.CreateContextMessageParams{
 				ID:        pgxID(message.ID),
+				Type:      message.Type,
+				ToolID:    pgxText(message.ToolID),
+				ToolName:  pgxText(message.ToolName),
+				ToolInput: pgxJSON(message.ToolInput),
 				Role:      message.Role,
 				Content:   message.Content,
 				CreatedAt: pgxTime(message.CreatedAt),
@@ -88,6 +92,10 @@ func (c *Database) GetContext(ctx context.Context, id string) (*shared.Context, 
 	for _, message := range messages {
 		result.Messages = append(result.Messages, shared.Message{
 			ID:        message.ID.String(),
+			Type:      message.Type,
+			ToolID:    message.ToolID.String,
+			ToolName:  message.ToolName.String,
+			ToolInput: string(message.ToolInput),
 			Role:      message.Role,
 			Content:   message.Content,
 			CreatedAt: message.CreatedAt.Time,
@@ -123,6 +131,10 @@ func (c *Database) AddMessages(ctx context.Context, id string, messages []shared
 			ctx,
 			queries.CreateContextMessageParams{
 				ID:        pgxID(message.ID),
+				Type:      message.Type,
+				ToolID:    pgxText(message.ToolID),
+				ToolName:  pgxText(message.ToolName),
+				ToolInput: pgxJSON(message.ToolInput),
 				Role:      message.Role,
 				Content:   message.Content,
 				CreatedAt: pgxTime(message.CreatedAt),

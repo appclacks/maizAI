@@ -23,6 +23,10 @@ func TestContextCRUD(t *testing.T) {
 				ID:        uuid.New().String(),
 				Role:      shared.AssistantRole,
 				Content:   "1234",
+				Type:      "text",
+				ToolName:  "test-tool",
+				ToolID:    "tool-123",
+				ToolInput: "{\"param\": \"value\"}",
 				CreatedAt: time.Now().UTC(),
 			},
 		},
@@ -39,6 +43,10 @@ func TestContextCRUD(t *testing.T) {
 	assert.Equal(t, get.Messages[0].Content, "1234")
 	assert.Equal(t, get.Messages[0].ID, context.Messages[0].ID)
 	assert.Equal(t, get.Messages[0].Role, context.Messages[0].Role)
+	assert.Equal(t, get.Messages[0].Type, "text")
+	assert.Equal(t, get.Messages[0].ToolName, "test-tool")
+	assert.Equal(t, get.Messages[0].ToolID, "tool-123")
+	assert.Equal(t, get.Messages[0].ToolInput, "{\"param\": \"value\"}")
 
 	err = TestComponent.UpdateContextMessage(ctx, context.Messages[0].ID, shared.UserRole, "new message")
 	assert.NoError(t, err)
@@ -70,12 +78,20 @@ func TestContextCRUD(t *testing.T) {
 				ID:        uuid.New().String(),
 				Role:      shared.AssistantRole,
 				Content:   "1234",
+				Type:      "tool_use",
+				ToolName:  "calculator",
+				ToolID:    "calc-456",
+				ToolInput: "{\"operation\": \"add\"}",
 				CreatedAt: time.Now().UTC(),
 			},
 			{
 				ID:        uuid.New().String(),
 				Role:      shared.UserRole,
 				Content:   "456",
+				Type:      "text",
+				ToolName:  "",
+				ToolID:    "",
+				ToolInput: "",
 				CreatedAt: time.Now().UTC(),
 			},
 		},
@@ -93,9 +109,17 @@ func TestContextCRUD(t *testing.T) {
 	assert.Equal(t, getSrc.Messages[0].Content, "1234")
 	assert.Equal(t, getSrc.Messages[0].ID, contextWithSource.Messages[0].ID)
 	assert.Equal(t, getSrc.Messages[0].Role, contextWithSource.Messages[0].Role)
+	assert.Equal(t, getSrc.Messages[0].Type, "tool_use")
+	assert.Equal(t, getSrc.Messages[0].ToolName, "calculator")
+	assert.Equal(t, getSrc.Messages[0].ToolID, "calc-456")
+	assert.Equal(t, getSrc.Messages[0].ToolInput, "{\"operation\": \"add\"}")
 	assert.Equal(t, getSrc.Messages[1].Content, "456")
 	assert.Equal(t, getSrc.Messages[1].ID, contextWithSource.Messages[1].ID)
 	assert.Equal(t, getSrc.Messages[1].Role, contextWithSource.Messages[1].Role)
+	assert.Equal(t, getSrc.Messages[1].Type, "text")
+	assert.Equal(t, getSrc.Messages[1].ToolName, "")
+	assert.Equal(t, getSrc.Messages[1].ToolID, "")
+	assert.Equal(t, getSrc.Messages[1].ToolInput, "")
 
 	exists, err := TestComponent.ContextExists(ctx, getSrc.ID)
 	assert.NoError(t, err)
@@ -118,12 +142,20 @@ func TestContextCRUD(t *testing.T) {
 			ID:        uuid.New().String(),
 			Role:      shared.AssistantRole,
 			Content:   "9876",
+			Type:      "tool_result",
+			ToolName:  "file-reader",
+			ToolID:    "file-789",
+			ToolInput: "{\"path\": \"/tmp/test\"}",
 			CreatedAt: time.Now().UTC(),
 		},
 		{
 			ID:        uuid.New().String(),
 			Role:      shared.UserRole,
 			Content:   "hello",
+			Type:      "text",
+			ToolName:  "",
+			ToolID:    "",
+			ToolInput: "",
 			CreatedAt: time.Now().UTC(),
 		},
 	}
@@ -136,15 +168,31 @@ func TestContextCRUD(t *testing.T) {
 	assert.Equal(t, getWithMsg.Messages[0].Content, "1234")
 	assert.Equal(t, getWithMsg.Messages[0].ID, contextWithSource.Messages[0].ID)
 	assert.Equal(t, getWithMsg.Messages[0].Role, contextWithSource.Messages[0].Role)
+	assert.Equal(t, getWithMsg.Messages[0].Type, "tool_use")
+	assert.Equal(t, getWithMsg.Messages[0].ToolName, "calculator")
+	assert.Equal(t, getWithMsg.Messages[0].ToolID, "calc-456")
+	assert.Equal(t, getWithMsg.Messages[0].ToolInput, "{\"operation\": \"add\"}")
 	assert.Equal(t, getWithMsg.Messages[1].Content, "456")
 	assert.Equal(t, getWithMsg.Messages[1].ID, contextWithSource.Messages[1].ID)
 	assert.Equal(t, getWithMsg.Messages[1].Role, contextWithSource.Messages[1].Role)
+	assert.Equal(t, getWithMsg.Messages[1].Type, "text")
+	assert.Equal(t, getWithMsg.Messages[1].ToolName, "")
+	assert.Equal(t, getWithMsg.Messages[1].ToolID, "")
+	assert.Equal(t, getWithMsg.Messages[1].ToolInput, "")
 	assert.Equal(t, getWithMsg.Messages[2].Content, "9876")
 	assert.Equal(t, getWithMsg.Messages[2].ID, messagesToAdd[0].ID)
 	assert.Equal(t, getWithMsg.Messages[2].Role, messagesToAdd[0].Role)
+	assert.Equal(t, getWithMsg.Messages[2].Type, "tool_result")
+	assert.Equal(t, getWithMsg.Messages[2].ToolName, "file-reader")
+	assert.Equal(t, getWithMsg.Messages[2].ToolID, "file-789")
+	assert.Equal(t, getWithMsg.Messages[2].ToolInput, "{\"path\": \"/tmp/test\"}")
 	assert.Equal(t, getWithMsg.Messages[3].Content, "hello")
 	assert.Equal(t, getWithMsg.Messages[3].ID, messagesToAdd[1].ID)
 	assert.Equal(t, getWithMsg.Messages[3].Role, messagesToAdd[1].Role)
+	assert.Equal(t, getWithMsg.Messages[3].Type, "text")
+	assert.Equal(t, getWithMsg.Messages[3].ToolName, "")
+	assert.Equal(t, getWithMsg.Messages[3].ToolID, "")
+	assert.Equal(t, getWithMsg.Messages[3].ToolInput, "")
 
 	listResult, err = TestComponent.ListContexts(ctx)
 	assert.NoError(t, err)

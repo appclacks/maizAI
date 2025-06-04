@@ -47,6 +47,10 @@ type Message struct {
 	Role      string    `json:"role" description:"The message role"`
 	Content   string    `json:"content" description:"The message content"`
 	CreatedAt time.Time `json:"created-at" description:"The message creation date"`
+	Type      string    `json:"type,omitempty"`
+	ToolName  string    `json:"tool-name,omitempty"`
+	ToolID    string    `json:"tool-id,omitempty"`
+	ToolInput string    `json:"tool-input,omitempty"`
 }
 
 type NewMessage struct {

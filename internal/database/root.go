@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -120,6 +121,20 @@ func pgxTime(t time.Time) pgtype.Timestamp {
 		Time:  t,
 		Valid: true,
 	}
+}
+
+func pgxJSON(s string) []byte {
+	if s == "" {
+		return nil
+	}
+	// Validate that it's valid JSON
+	var temp interface{}
+	if err := json.Unmarshal([]byte(s), &temp); err != nil {
+		// If it's not valid JSON, wrap it as a string value
+		jsonBytes, _ := json.Marshal(s)
+		return jsonBytes
+	}
+	return []byte(s)
 }
 
 func (c *Database) beginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, *queries.Queries, func(), error) {
