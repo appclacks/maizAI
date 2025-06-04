@@ -14,6 +14,8 @@ import (
 	"github.com/appclacks/maizai/pkg/assistant"
 	ct "github.com/appclacks/maizai/pkg/context"
 	"github.com/appclacks/maizai/pkg/rag"
+	"github.com/appclacks/maizai/pkg/tools"
+	"github.com/appclacks/maizai/pkg/tools/aggregates"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 )
@@ -49,8 +51,14 @@ func RunServer() error {
 	}
 	manager := ct.New(db)
 
+	listFiles := tools.ToolListFiles{}
+	// todo: don't hardcode tool name
+	tools := map[string]aggregates.Tools{
+		"ListFiles": &listFiles,
+	}
+
 	rag := rag.New(db, embeddingProviders)
-	ai := assistant.New(clients, manager, rag)
+	ai := assistant.New(clients, manager, rag, tools)
 
 	handlersBuilder := handlers.NewBuilder(ai, manager, rag, db)
 	server, err := http.New(config.HTTP, registry, handlersBuilder)

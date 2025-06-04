@@ -2,6 +2,7 @@ package assistant
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/appclacks/maizai/pkg/assistant/aggregates"
 	ragdata "github.com/appclacks/maizai/pkg/rag/aggregates"
 	"github.com/appclacks/maizai/pkg/shared"
+	taggregates "github.com/appclacks/maizai/pkg/tools/aggregates"
 	"github.com/google/uuid"
 )
 
@@ -33,13 +35,15 @@ type Assistant struct {
 	rag        Rag
 	ctxManager ContextManager
 	providers  map[string]Provider
+	tools      map[string]taggregates.Tools
 }
 
-func New(clients map[string]Provider, ctxManager ContextManager, rag Rag) *Assistant {
+func New(clients map[string]Provider, ctxManager ContextManager, rag Rag, tools map[string]taggregates.Tools) *Assistant {
 	return &Assistant{
 		rag:        rag,
 		ctxManager: ctxManager,
 		providers:  clients,
+		tools:      tools,
 	}
 }
 
@@ -144,6 +148,64 @@ func (a *Assistant) EnrichWithRag(ctx context.Context, messages []shared.Message
 		result = append(result, message)
 	}
 	return result, nil
+}
+
+func (a *Assistant) ExecuteTool(
+	ctx context.Context,
+	options aggregates.QueryOptions,
+	contextID string) (*aggregates.Answer, error) {
+	context, err := a.ctxManager.GetContext(ctx, contextID)
+	if err != nil {
+		return nil, err
+	}
+	if len(context.Messages) == 0 {
+		return nil, errors.New("this context doesnt have any message")
+	}
+	err = options.Validate()
+	if err != nil {
+		return nil, err
+	}
+	message := context.Messages[len(context.Messages)-1]
+	if message.Type != shared.ToolUseMessageType {
+		return nil, fmt.Errorf("the last message for this context is of type %s, not %s", message.Type, shared.ToolUseMessageType)
+	}
+	toolName := message.ToolName
+	tool, ok := a.tools[toolName]
+	if !ok {
+		return nil, fmt.Errorf("tool %s not configured", toolName)
+	}
+	toolResult, err := tool.Execute(message.ToolInput)
+	if err != nil {
+		return nil, err
+	}
+	id, err := uuid.NewV6()
+	if err != nil {
+		return nil, err
+	}
+	toolMessage := shared.Message{
+		ID:        id.String(),
+		Role:      shared.UserRole,
+		Content:   toolResult,
+		CreatedAt: time.Now().UTC(),
+		ToolID:    message.ToolID,
+		Type:      shared.ToolResultMessageType,
+	}
+	newMessages := []shared.Message{toolMessage}
+	fullMessages, err := a.Enrich(ctx, context, newMessages)
+	if err != nil {
+		return nil, err
+	}
+
+	answer, err := a.Message(ctx, fullMessages, options)
+	if err != nil {
+		return nil, err
+	}
+	err = a.UpdateContext(ctx, context.ID, newMessages, answer.Results)
+	if err != nil {
+		return nil, err
+	}
+
+	return answer, nil
 }
 
 func (a *Assistant) Pipeline(
