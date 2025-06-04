@@ -13,15 +13,19 @@ import (
 
 const createContextMessage = `-- name: CreateContextMessage :one
 INSERT INTO context_message (
-  id, role, content, created_at, context_id
+  id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
-RETURNING ordering, id, role, content, created_at, context_id
+RETURNING ordering, id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
 `
 
 type CreateContextMessageParams struct {
 	ID        pgtype.UUID
+	Type      string
+	ToolID    pgtype.Text
+	ToolName  pgtype.Text
+	ToolInput []byte
 	Role      string
 	Content   string
 	CreatedAt pgtype.Timestamp
@@ -31,6 +35,10 @@ type CreateContextMessageParams struct {
 func (q *Queries) CreateContextMessage(ctx context.Context, arg CreateContextMessageParams) (ContextMessage, error) {
 	row := q.db.QueryRow(ctx, createContextMessage,
 		arg.ID,
+		arg.Type,
+		arg.ToolID,
+		arg.ToolName,
+		arg.ToolInput,
 		arg.Role,
 		arg.Content,
 		arg.CreatedAt,
@@ -40,6 +48,10 @@ func (q *Queries) CreateContextMessage(ctx context.Context, arg CreateContextMes
 	err := row.Scan(
 		&i.Ordering,
 		&i.ID,
+		&i.Type,
+		&i.ToolID,
+		&i.ToolName,
+		&i.ToolInput,
 		&i.Role,
 		&i.Content,
 		&i.CreatedAt,
@@ -69,13 +81,17 @@ func (q *Queries) DeleteContextMessagesForContext(ctx context.Context, contextID
 }
 
 const getContextMessages = `-- name: GetContextMessages :many
-SELECT id, role, content, created_at FROM context_message
+SELECT id, type, tool_id, tool_name, tool_input, role, content, created_at FROM context_message
 WHERE context_id = $1
 ORDER BY ordering
 `
 
 type GetContextMessagesRow struct {
 	ID        pgtype.UUID
+	Type      string
+	ToolID    pgtype.Text
+	ToolName  pgtype.Text
+	ToolInput []byte
 	Role      string
 	Content   string
 	CreatedAt pgtype.Timestamp
@@ -92,6 +108,10 @@ func (q *Queries) GetContextMessages(ctx context.Context, contextID pgtype.UUID)
 		var i GetContextMessagesRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.Type,
+			&i.ToolID,
+			&i.ToolName,
+			&i.ToolInput,
 			&i.Role,
 			&i.Content,
 			&i.CreatedAt,

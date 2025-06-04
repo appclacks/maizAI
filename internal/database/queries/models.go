@@ -19,6 +19,10 @@ type Context struct {
 type ContextMessage struct {
 	Ordering  pgtype.Int8
 	ID        pgtype.UUID
+	Type      string
+	ToolID    pgtype.Text
+	ToolName  pgtype.Text
+	ToolInput []byte
 	Role      string
 	Content   string
 	CreatedAt pgtype.Timestamp
