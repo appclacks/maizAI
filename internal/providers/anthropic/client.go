@@ -114,14 +114,11 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 			if err != nil {
 				return nil, err
 			}
-			toolResult, err := c.tools[0].Execute(string(inputJSON))
-			if err != nil {
-				return nil, err
-			}
 			result = append(result, aggregates.Result{
-				ToolResult: aggregates.ToolResult{
-					ID:   block.ID,
-					Name: block.Name,
+				ToolUse: aggregates.ToolUse{
+					ID:        block.ID,
+					Name:      block.Name,
+					InputJSON: string(inputJSON),
 				},
 			})
 		}
