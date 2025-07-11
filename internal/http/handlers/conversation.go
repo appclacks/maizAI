@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/appclacks/maizai/internal/http/client"
 	"github.com/appclacks/maizai/pkg/assistant/aggregates"
@@ -17,6 +18,8 @@ func (b *Builder) Conversation(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
+	payload.QueryOptions.Model = strings.ToLower(payload.QueryOptions.Model)
+	payload.QueryOptions.RagQuery.Model = strings.ToLower(payload.QueryOptions.RagQuery.Model)
 
 	messages := []shared.Message{}
 	for _, m := range payload.Messages {

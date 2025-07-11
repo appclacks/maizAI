@@ -55,8 +55,8 @@ type NewMessage struct {
 }
 
 type AddMessagesToContextInput struct {
-	ID       string `json:"-" param:"id" path:"id"`
-	Messages []NewMessage
+	ID       string       `json:"-" param:"id" path:"id"`
+	Messages []NewMessage `json:"messages"`
 }
 
 type UpdateContextMessageInput struct {

@@ -14,6 +14,7 @@ import (
 	"github.com/appclacks/maizai/internal/http/handlers"
 	"github.com/appclacks/maizai/internal/tls"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
@@ -75,6 +76,13 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 
 	e.Use(otelecho.Middleware("maizai"))
 	e.Use(metricsMiddleware(reqHistogram, respCounter))
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowHeaders: []string{"*"},
+		AllowMethods: []string{"*"},
+	}))
+
 	e.GET("/healthz", func(ec echo.Context) error {
 		return ec.JSON(http.StatusOK, "ok")
 	})

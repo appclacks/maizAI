@@ -17,7 +17,7 @@ type QueryOptions struct {
 	Temperature float64        `json:"temperature" description:"The temperature parameter passed to the AI provider"`
 	MaxTokens   uint64         `json:"max-tokens" required:"true" description:"The maximum number of tokens for the output"`
 	Provider    string         `json:"provider" required:"true" description:"The AI provider to use"`
-	RagQuery    RagSearchQuery `json:"rag,omitempty" description:"RAG query configuration"`
+	RagQuery    RagSearchQuery `json:"rag" description:"RAG query configuration"`
 }
 
 type ContextOptions struct {

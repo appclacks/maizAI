@@ -83,6 +83,11 @@ paths:
         required: true
         schema:
           type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientAddMessagesToContextInput'
       responses:
         "200":
           content:
@@ -385,6 +390,14 @@ paths:
           description: OK
 components:
   schemas:
+    ClientAddMessagesToContextInput:
+      properties:
+        messages:
+          items:
+            $ref: '#/components/schemas/ClientNewMessage'
+          nullable: true
+          type: array
+      type: object
     ClientContext:
       properties:
         created-at:
