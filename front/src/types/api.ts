@@ -120,3 +120,37 @@ export interface ClientCreateSystemPromptInput {
 export interface ClientUpdateSystemPromptInput {
   content: string;
 }
+
+// Document management types
+export interface ClientDocument {
+  id: string;
+  name: string;
+  description?: string;
+  'created-at': string;
+}
+
+export interface ClientListDocumentsOutput {
+  documents: ClientDocument[] | null;
+}
+
+export interface ClientCreateDocumentInput {
+  name: string;
+  description?: string;
+}
+
+export interface ClientDocumentChunk {
+  id: string;
+  'document-id': string;
+  fragment: string;
+  'created-at': string;
+}
+
+export interface ClientListDocumentChunksOutput {
+  chunks: ClientDocumentChunk[] | null;
+}
+
+export interface ClientEmbedDocumentInput {
+  model: string;
+  input: string;
+  provider: string;
+}

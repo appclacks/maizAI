@@ -20,7 +20,7 @@ export default function ConversationPage() {
   
   // Default configuration
   const defaultConfig = {
-    model: 'gpt-4',
+    model: 'claude-3-7-sonnet-latest',
     provider: 'anthropic',
     maxTokens: 1000,
     temperature: 0.7,
