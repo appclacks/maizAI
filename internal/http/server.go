@@ -90,6 +90,14 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 			description: "Send a message to the AI provider. If a context ID is passed as parameter, use this context as a base. Else, a new context whose name will be the context named as parameter will be created.",
 		},
 		{
+			path:        "/conversation/tools-call",
+			method:      http.MethodPost,
+			handler:     builder.ToolCall,
+			payload:     client.ToolCallInput{},
+			response:    client.ConversationAnswer{},
+			description: "Call a tool",
+		},
+		{
 			path:        "/context",
 			method:      http.MethodGet,
 			handler:     builder.ListContexts,

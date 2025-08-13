@@ -12,6 +12,7 @@ import (
 type Assistant interface {
 	Pipeline(ctx context.Context, options aggregates.QueryOptions, contextOptions shared.ContextOptions, context string, messages []shared.Message) (*aggregates.Answer, error)
 	StreamPipeline(ctx context.Context, options aggregates.QueryOptions, contextOptions shared.ContextOptions, contextID string, messages []shared.Message) (<-chan aggregates.Event, error)
+	ExecuteTool(ctx context.Context, options aggregates.QueryOptions, contextID string) (*aggregates.Answer, error)
 }
 
 type ContextManager interface {

@@ -54,6 +54,12 @@ type ConversationStreamEvent struct {
 	Context      string `json:"context,omitempty"`
 }
 
+type ToolCallInput struct {
+	QueryOptions   QueryOptions `json:"query-options" description:"The conversation query options"`
+	ContextID      string       `json:"context-id,omitempty" description:"The ID of an existing context where the tool will be called"`
+	SystemPromptID string       `json:"system-prompt-id,omitempty" description:"The ID of a system prompt to use for this conversation"`
+}
+
 func (c *Client) CreateConversation(ctx context.Context, input CreateConversationInput) (*ConversationAnswer, error) {
 	var result ConversationAnswer
 	_, err := c.sendRequest(ctx, "/api/v1/conversation", http.MethodPost, input, &result, nil)

@@ -12,6 +12,36 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func (b *Builder) ToolCall(ec echo.Context) error {
+	var payload client.ToolCallInput
+	if err := ec.Bind(&payload); err != nil {
+		return err
+	}
+	queryOpts := aggregates.QueryOptions{
+		Model:       payload.QueryOptions.Model,
+		Temperature: payload.QueryOptions.Temperature,
+		MaxTokens:   payload.QueryOptions.MaxTokens,
+		Provider:    payload.QueryOptions.Provider,
+	}
+	ctx := ec.Request().Context()
+	answer, err := b.assistant.ExecuteTool(ctx, queryOpts, payload.ContextID)
+	if err != nil {
+		return err
+	}
+	response := client.ConversationAnswer{
+		Results:      []client.Result{},
+		InputTokens:  answer.InputTokens,
+		OutputTokens: answer.OutputTokens,
+		Context:      answer.Context,
+	}
+	for _, result := range answer.Results {
+		response.Results = append(response.Results, client.Result{
+			Text: result.Text,
+		})
+	}
+	return ec.JSON(http.StatusOK, response)
+}
+
 func (b *Builder) Conversation(ec echo.Context) error {
 	var payload client.CreateConversationInput
 	if err := ec.Bind(&payload); err != nil {

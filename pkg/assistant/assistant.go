@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -174,6 +175,7 @@ func (a *Assistant) ExecuteTool(
 	if !ok {
 		return nil, fmt.Errorf("tool %s not configured", toolName)
 	}
+	slog.Info(fmt.Sprintf("executing tool %s", toolName))
 	toolResult, err := tool.Execute(message.ToolInput)
 	if err != nil {
 		return nil, err
