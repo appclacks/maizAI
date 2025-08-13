@@ -17,13 +17,26 @@ func (b *Builder) ToolCall(ec echo.Context) error {
 	if err := ec.Bind(&payload); err != nil {
 		return err
 	}
+	ctx := ec.Request().Context()
+	systemPrompt := payload.QueryOptions.System
+	if payload.SystemPromptID != "" {
+		prompt, err := b.systemPromptManager.GetSystemPrompt(ctx, payload.SystemPromptID)
+		if err != nil {
+			return err
+		}
+		if systemPrompt != "" {
+			systemPrompt = prompt.Content + "\n\n" + systemPrompt
+		} else {
+			systemPrompt = prompt.Content
+		}
+	}
 	queryOpts := aggregates.QueryOptions{
 		Model:       payload.QueryOptions.Model,
 		Temperature: payload.QueryOptions.Temperature,
 		MaxTokens:   payload.QueryOptions.MaxTokens,
 		Provider:    payload.QueryOptions.Provider,
+		System:      systemPrompt,
 	}
-	ctx := ec.Request().Context()
 	answer, err := b.assistant.ExecuteTool(ctx, queryOpts, payload.ContextID)
 	if err != nil {
 		return err

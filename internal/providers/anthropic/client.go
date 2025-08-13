@@ -75,9 +75,24 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	for _, message := range messages {
 		switch message.Role {
 		case "user":
-			messagesParam = append(messagesParam, anthropic.NewUserMessage(anthropic.NewTextBlock(message.Content)))
+			if message.Type == shared.ToolResultMessageType {
+				// todo handle errors
+
+				messagesParam = append(messagesParam, anthropic.NewUserMessage(anthropic.NewToolResultBlock(message.ToolID, message.Content, false)))
+			} else {
+				messagesParam = append(messagesParam, anthropic.NewUserMessage(anthropic.NewTextBlock(message.Content)))
+			}
 		case "assistant":
-			messagesParam = append(messagesParam, anthropic.NewAssistantMessage(anthropic.NewTextBlock(message.Content)))
+			if message.Type == shared.ToolUseMessageType {
+				var inputMap map[string]any
+				err := json.Unmarshal([]byte(message.ToolInput), &inputMap)
+				if err != nil {
+					return nil, err
+				}
+				messagesParam = append(messagesParam, anthropic.NewAssistantMessage(anthropic.NewToolUseBlock(message.ToolID, inputMap, message.ToolName)))
+			} else {
+				messagesParam = append(messagesParam, anthropic.NewAssistantMessage(anthropic.NewTextBlock(message.Content)))
+			}
 		default:
 			err := fmt.Errorf("unknown role %s", message.Role)
 			otelspan.Error(span, err, "unknown role")
@@ -85,7 +100,7 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 		}
 	}
 	messageParam := anthropic.MessageNewParams{
-		Model:     options.Model,
+		Model:     anthropic.Model(options.Model),
 		MaxTokens: int64(options.MaxTokens),
 		Messages:  messagesParam,
 		Tools:     tools,
@@ -156,7 +171,7 @@ func (c *Client) Stream(ctx context.Context, messages []shared.Message, options 
 		}
 	}
 	messageParam := anthropic.MessageNewParams{
-		Model:     options.Model,
+		Model:     anthropic.Model(options.Model),
 		MaxTokens: int64(options.MaxTokens),
 		Messages:  messagesParam,
 	}
