@@ -90,14 +90,6 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 			description: "Send a message to the AI provider. If a context ID is passed as parameter, use this context as a base. Else, a new context whose name will be the context named as parameter will be created.",
 		},
 		{
-			path:        "/conversation/tools-call",
-			method:      http.MethodPost,
-			handler:     builder.ToolCall,
-			payload:     client.ToolCallInput{},
-			response:    client.ConversationAnswer{},
-			description: "Call a tool",
-		},
-		{
 			path:        "/context",
 			method:      http.MethodGet,
 			handler:     builder.ListContexts,
@@ -112,6 +104,14 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 			payload:     client.GetContextInput{},
 			response:    client.Context{},
 			description: "Get a context by ID",
+		},
+		{
+			path:        "/context/:id/tool-call",
+			method:      http.MethodPost,
+			handler:     builder.ToolCall,
+			payload:     client.ToolCallInput{},
+			response:    client.ConversationAnswer{},
+			description: "Call a tool",
 		},
 		{
 			path:        "/context",
@@ -287,25 +287,6 @@ func New(config Configuration, registry *prometheus.Registry, builder *handlers.
 	if err != nil {
 		return nil, err
 	}
-	//apiGroup := e.Group("/api/v1")
-	//apiGroup.POST("/conversation", builder.Conversation)
-	//apiGroup.GET("/context", builder.ListContexts)
-	//apiGroup.GET("/context/:id", builder.GetContext)
-	//apiGroup.POST("/context", builder.CreateContext)
-	//apiGroup.DELETE("/context/:id", builder.DeleteContext)
-	//apiGroup.DELETE("/context/:id/sources/context/:source-context-id", builder.DeleteContextSourceContext)
-	//apiGroup.POST("/context/:id/sources/context/:source-context-id", builder.CreateContextSourceContext)
-	//apiGroup.POST("/context/:id/message", builder.AddMessagesToContext)
-	//apiGroup.PUT("/message/:id", builder.UpdateContextMessage)
-	//apiGroup.DELETE("/message/:id", builder.DeleteContextMessage)
-	//apiGroup.GET("/document", builder.ListDocuments)
-	//apiGroup.POST("/document", builder.CreateDocument)
-	//apiGroup.POST("/document/:document-id", builder.EmbedDocument)
-	//apiGroup.GET("/document/:id", builder.GetDocument)
-	//apiGroup.GET("/document/:id/chunks", builder.ListDocumentChunksForDocument)
-	//apiGroup.DELETE("/document/:id", builder.DeleteDocument)
-	//apiGroup.DELETE("/document-chunk/:id", builder.DeleteDocumentChunk)
-	//apiGroup.PUT("/document-chunk", builder.MatchChunk)
 
 	return &Server{
 		config: &config,

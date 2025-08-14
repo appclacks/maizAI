@@ -43,6 +43,7 @@ type Result struct {
 }
 
 type Answer struct {
+	ContentID    string   `json:"content_id"`
 	Results      []Result `json:"result"`
 	InputTokens  uint64   `json:"input-tokens"`
 	OutputTokens uint64   `json:"output-tokens"`

@@ -17,6 +17,7 @@ const ToolUseMessageType = "tool_use"
 
 type Message struct {
 	ID        string    `json:"id"`
+	ContentID string    `json:"content_id"`
 	Role      string    `json:"role"`
 	Content   string    `json:"content"`
 	Type      string    `json:"type,omitempty"`
@@ -31,8 +32,13 @@ func NewMessage(role string, content string) (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
+	content_id, err := uuid.NewV6()
+	if err != nil {
+		return nil, err
+	}
 	return &Message{
 		Type:      TextMessageType,
+		ContentID: content_id.String(),
 		ID:        id.String(),
 		Role:      role,
 		Content:   content,
@@ -60,6 +66,9 @@ func (m Message) Validate() error {
 	}
 	if m.Content == "" {
 		return errors.New("Message content can't be empty")
+	}
+	if m.ContentID == "" {
+		return errors.New("Message content ID can't be empty")
 	}
 	return nil
 }

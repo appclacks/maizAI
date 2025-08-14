@@ -37,7 +37,7 @@ func (b *Builder) ToolCall(ec echo.Context) error {
 		Provider:    payload.QueryOptions.Provider,
 		System:      systemPrompt,
 	}
-	answer, err := b.assistant.ExecuteTool(ctx, queryOpts, payload.ContextID)
+	answer, err := b.assistant.ExecuteTool(ctx, queryOpts, payload.ID)
 	if err != nil {
 		return err
 	}
@@ -50,6 +50,14 @@ func (b *Builder) ToolCall(ec echo.Context) error {
 	for _, result := range answer.Results {
 		response.Results = append(response.Results, client.Result{
 			Text: result.Text,
+			ToolUse: client.ToolUse{
+				ID:        result.ToolUse.ID,
+				Name:      result.ToolUse.Name,
+				InputJSON: result.ToolUse.InputJSON,
+			},
+			ToolResult: client.ToolResult{
+				ID: result.ToolResult.ID,
+			},
 		})
 	}
 	return ec.JSON(http.StatusOK, response)
@@ -157,6 +165,14 @@ func (b *Builder) Conversation(ec echo.Context) error {
 		for _, result := range answer.Results {
 			response.Results = append(response.Results, client.Result{
 				Text: result.Text,
+				ToolUse: client.ToolUse{
+					ID:        result.ToolUse.ID,
+					Name:      result.ToolUse.Name,
+					InputJSON: result.ToolUse.InputJSON,
+				},
+				ToolResult: client.ToolResult{
+					ID: result.ToolResult.ID,
+				},
 			})
 		}
 		return ec.JSON(http.StatusOK, response)

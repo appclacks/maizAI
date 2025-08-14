@@ -35,8 +35,20 @@ type CreateConversationInput struct {
 	SystemPromptID    string         `json:"system-prompt-id,omitempty" description:"The ID of a system prompt to use for this conversation"`
 }
 
+type ToolResult struct {
+	ID string `json:"id,omitempty"`
+}
+
+type ToolUse struct {
+	ID        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	InputJSON string `json:"input-json,omitempty"`
+}
+
 type Result struct {
-	Text string `json:"text"`
+	Text       string     `json:"text,omitempty"`
+	ToolUse    ToolUse    `json:"tool-use"`
+	ToolResult ToolResult `json:"tool-result"`
 }
 
 type ConversationAnswer struct {
@@ -56,7 +68,7 @@ type ConversationStreamEvent struct {
 
 type ToolCallInput struct {
 	QueryOptions   QueryOptions `json:"query-options" description:"The conversation query options"`
-	ContextID      string       `json:"context-id,omitempty" description:"The ID of an existing context where the tool will be called"`
+	ID             string       `param:"id" path:"id" description:"The ID of an existing context where the tool will be called"`
 	SystemPromptID string       `json:"system-prompt-id,omitempty" description:"The ID of a system prompt to use for this conversation"`
 }
 

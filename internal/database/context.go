@@ -51,6 +51,7 @@ func (c *Database) CreateContext(ctx context.Context, context shared.Context) er
 			ctx,
 			queries.CreateContextMessageParams{
 				ID:        pgxID(message.ID),
+				ContentID: pgxID(message.ContentID),
 				Type:      message.Type,
 				ToolID:    pgxText(message.ToolID),
 				ToolName:  pgxText(message.ToolName),
@@ -131,6 +132,7 @@ func (c *Database) AddMessages(ctx context.Context, id string, messages []shared
 			ctx,
 			queries.CreateContextMessageParams{
 				ID:        pgxID(message.ID),
+				ContentID: pgxID(message.ContentID),
 				Type:      message.Type,
 				ToolID:    pgxText(message.ToolID),
 				ToolName:  pgxText(message.ToolName),

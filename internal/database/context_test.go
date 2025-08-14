@@ -21,6 +21,7 @@ func TestContextCRUD(t *testing.T) {
 		Messages: []shared.Message{
 			{
 				ID:        uuid.New().String(),
+				ContentID: uuid.New().String(),
 				Role:      shared.AssistantRole,
 				Content:   "1234",
 				Type:      "text",
@@ -76,6 +77,7 @@ func TestContextCRUD(t *testing.T) {
 		Messages: []shared.Message{
 			{
 				ID:        uuid.New().String(),
+				ContentID: uuid.New().String(),
 				Role:      shared.AssistantRole,
 				Content:   "1234",
 				Type:      "tool_use",
@@ -86,6 +88,7 @@ func TestContextCRUD(t *testing.T) {
 			},
 			{
 				ID:        uuid.New().String(),
+				ContentID: uuid.New().String(),
 				Role:      shared.UserRole,
 				Content:   "456",
 				Type:      "text",
@@ -140,6 +143,7 @@ func TestContextCRUD(t *testing.T) {
 	messagesToAdd := []shared.Message{
 		{
 			ID:        uuid.New().String(),
+			ContentID: uuid.New().String(),
 			Role:      shared.AssistantRole,
 			Content:   "9876",
 			Type:      "tool_result",
@@ -150,6 +154,7 @@ func TestContextCRUD(t *testing.T) {
 		},
 		{
 			ID:        uuid.New().String(),
+			ContentID: uuid.New().String(),
 			Role:      shared.UserRole,
 			Content:   "hello",
 			Type:      "text",

@@ -44,6 +44,7 @@ type DeleteContextMessagesInput struct {
 
 type Message struct {
 	ID        string    `json:"id" description:"The message ID"`
+	ContentID string    `json:"content_id" description:"The message content ID"`
 	Role      string    `json:"role" description:"The message role"`
 	Content   string    `json:"content" description:"The message content"`
 	CreatedAt time.Time `json:"created-at" description:"The message creation date"`

@@ -19,6 +19,7 @@ type Context struct {
 type ContextMessage struct {
 	Ordering  pgtype.Int8
 	ID        pgtype.UUID
+	ContentID pgtype.UUID
 	Type      string
 	ToolID    pgtype.Text
 	ToolName  pgtype.Text

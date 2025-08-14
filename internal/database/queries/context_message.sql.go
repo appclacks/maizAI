@@ -13,15 +13,16 @@ import (
 
 const createContextMessage = `-- name: CreateContextMessage :one
 INSERT INTO context_message (
-  id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
+  id, content_id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
-RETURNING ordering, id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
+RETURNING ordering, id, content_id, type, tool_id, tool_name, tool_input, role, content, created_at, context_id
 `
 
 type CreateContextMessageParams struct {
 	ID        pgtype.UUID
+	ContentID pgtype.UUID
 	Type      string
 	ToolID    pgtype.Text
 	ToolName  pgtype.Text
@@ -35,6 +36,7 @@ type CreateContextMessageParams struct {
 func (q *Queries) CreateContextMessage(ctx context.Context, arg CreateContextMessageParams) (ContextMessage, error) {
 	row := q.db.QueryRow(ctx, createContextMessage,
 		arg.ID,
+		arg.ContentID,
 		arg.Type,
 		arg.ToolID,
 		arg.ToolName,
@@ -48,6 +50,7 @@ func (q *Queries) CreateContextMessage(ctx context.Context, arg CreateContextMes
 	err := row.Scan(
 		&i.Ordering,
 		&i.ID,
+		&i.ContentID,
 		&i.Type,
 		&i.ToolID,
 		&i.ToolName,
@@ -81,13 +84,14 @@ func (q *Queries) DeleteContextMessagesForContext(ctx context.Context, contextID
 }
 
 const getContextMessages = `-- name: GetContextMessages :many
-SELECT id, type, tool_id, tool_name, tool_input, role, content, created_at FROM context_message
+SELECT id, content_id, type, tool_id, tool_name, tool_input, role, content, created_at FROM context_message
 WHERE context_id = $1
 ORDER BY ordering
 `
 
 type GetContextMessagesRow struct {
 	ID        pgtype.UUID
+	ContentID pgtype.UUID
 	Type      string
 	ToolID    pgtype.Text
 	ToolName  pgtype.Text
@@ -108,6 +112,7 @@ func (q *Queries) GetContextMessages(ctx context.Context, contextID pgtype.UUID)
 		var i GetContextMessagesRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.ContentID,
 			&i.Type,
 			&i.ToolID,
 			&i.ToolName,

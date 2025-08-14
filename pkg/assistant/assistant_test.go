@@ -26,7 +26,7 @@ func TestPipeline(t *testing.T) {
 
 	clients := make(map[string]assistant.Provider)
 	clients["test"] = client
-	ai := assistant.New(clients, manager, rag)
+	ai := assistant.New(clients, manager, rag, nil)
 
 	ctx := context.Background()
 
@@ -62,6 +62,7 @@ func TestPipeline(t *testing.T) {
 	messages := []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "message1 {ragdata}",
 			CreatedAt: time.Now().UTC(),
@@ -89,7 +90,7 @@ func TestEnrich(t *testing.T) {
 	store := memory.New()
 	manager := ct.New(store)
 
-	ai := assistant.New(nil, manager, nil)
+	ai := assistant.New(nil, manager, nil, nil)
 	ctx := context.Background()
 
 	context1 := shared.Context{
@@ -102,6 +103,7 @@ func TestEnrich(t *testing.T) {
 	err = manager.AddMessagesToContext(ctx, context1.ID, []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.AssistantRole,
 			Content:   "context 1 content 1",
 			CreatedAt: time.Now().UTC(),
@@ -118,6 +120,7 @@ func TestEnrich(t *testing.T) {
 	err = manager.AddMessagesToContext(ctx, context2.ID, []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "context 2 content 1",
 			CreatedAt: time.Now().UTC(),
@@ -127,6 +130,7 @@ func TestEnrich(t *testing.T) {
 	err = manager.AddMessagesToContext(ctx, context2.ID, []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "context 2 content 2",
 			CreatedAt: time.Now().UTC(),
@@ -146,6 +150,7 @@ func TestEnrich(t *testing.T) {
 	err = manager.AddMessagesToContext(ctx, context3.ID, []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "context 3 content 1",
 			CreatedAt: time.Now().UTC(),
@@ -166,12 +171,14 @@ func TestEnrich(t *testing.T) {
 	err = manager.AddMessagesToContext(ctx, context4.ID, []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.AssistantRole,
 			Content:   "context 4 content 1",
 			CreatedAt: time.Now().UTC(),
 		},
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "context 4 content 2",
 			CreatedAt: time.Now().UTC(),
@@ -182,12 +189,14 @@ func TestEnrich(t *testing.T) {
 	messages := []shared.Message{
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.AssistantRole,
 			Content:   "final msg 1",
 			CreatedAt: time.Now().UTC(),
 		},
 		{
 			ID:        uuid.NewString(),
+			ContentID: uuid.NewString(),
 			Role:      shared.UserRole,
 			Content:   "final msg 2",
 			CreatedAt: time.Now().UTC(),

@@ -21,6 +21,7 @@ create table if not exists context_source (
 create table if not exists context_message (
   ordering bigserial,
   id uuid not null primary key,
+  content_id uuid not null,
   type varchar(255) not null,
   tool_id varchar(255),
   tool_name varchar(255),

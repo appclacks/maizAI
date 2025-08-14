@@ -8,5 +8,5 @@ type Tools interface {
 type Tool struct {
 	Name        string
 	Description string
-	Properties  map[string]interface{}
+	Properties  map[string]any
 }

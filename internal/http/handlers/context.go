@@ -36,6 +36,7 @@ func toClientContext(context shared.Context) client.Context {
 	for _, message := range context.Messages {
 		result.Messages = append(result.Messages, client.Message{
 			ID:        message.ID,
+			ContentID: message.ContentID,
 			Role:      message.Role,
 			Content:   message.Content,
 			CreatedAt: message.CreatedAt,

@@ -101,16 +101,17 @@ func (a *Assistant) Enrich(ctx context.Context, context *shared.Context, message
 	return result, nil
 }
 
-func (a *Assistant) UpdateContext(ctx context.Context, context string, messages []shared.Message, results []aggregates.Result) error {
+func (a *Assistant) UpdateContext(ctx context.Context, context string, messages []shared.Message, answer *aggregates.Answer) error {
 	update := []shared.Message{}
 	update = append(update, messages...)
-	for _, result := range results {
+	for _, result := range answer.Results {
 		id, err := uuid.NewV6()
 		if err != nil {
 			return err
 		}
 		message := shared.Message{
 			ID:        id.String(),
+			ContentID: answer.Context,
 			CreatedAt: time.Now().UTC(),
 			Role:      shared.AssistantRole,
 			Content:   result.Text,
@@ -202,7 +203,7 @@ func (a *Assistant) ExecuteTool(
 	if err != nil {
 		return nil, err
 	}
-	err = a.UpdateContext(ctx, context.ID, newMessages, answer.Results)
+	err = a.UpdateContext(ctx, context.ID, newMessages, answer)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +248,7 @@ func (a *Assistant) Pipeline(
 		return nil, err
 	}
 	answer.Context = context.ID
-	err = a.UpdateContext(ctx, context.ID, messages, answer.Results)
+	err = a.UpdateContext(ctx, context.ID, messages, answer)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +304,7 @@ func (a *Assistant) StreamPipeline(
 				// so it's safe to assume that the streamChan channel is closed
 				answer := event.Answer
 				answer.Context = context.ID
-				err = a.UpdateContext(ctx, context.ID, messages, answer.Results)
+				err = a.UpdateContext(ctx, context.ID, messages, answer)
 				if err != nil {
 					event.Error = err
 				}

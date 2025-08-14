@@ -117,12 +117,14 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 	}
 
 	result := []aggregates.Result{}
-
 	for _, m := range message.Content {
 		switch block := m.AsAny().(type) {
 		case anthropic.TextBlock:
 			result = append(result, aggregates.Result{
 				Text: m.Text,
+				ToolResult: aggregates.ToolResult{
+					ID: m.ToolUseID,
+				},
 			})
 		case anthropic.ToolUseBlock:
 			inputJSON, err := json.Marshal(block.Input)
@@ -137,8 +139,10 @@ func (c *Client) Query(ctx context.Context, messages []shared.Message, options a
 				},
 			})
 		}
+
 	}
 	answer := aggregates.Answer{
+		ContentID:    message.ID,
 		Results:      result,
 		InputTokens:  uint64(message.Usage.InputTokens),
 		OutputTokens: uint64(message.Usage.OutputTokens),
